@@ -2,7 +2,7 @@
 <script lang="ts">
 	import { Zap } from '@lucide/svelte';
 
-	let { zaehlerstand }: { zaehlerstand: number } = $props();
+	let { zaehlerstand }: { zaehlerstand: number | null } = $props();
 </script>
 
 <div class="flex h-full flex-col justify-center rounded-2xl bg-navy-900 p-3">
@@ -18,12 +18,14 @@
 			</span>
 			<div class="flex items-baseline gap-1">
 				<span class="text-2xl leading-tight font-bold text-cream-100">
-					{zaehlerstand.toLocaleString('de-DE', {
-						minimumFractionDigits: 1,
-						maximumFractionDigits: 1
-					})}
+					{zaehlerstand !== null
+						? zaehlerstand.toLocaleString('de-DE', {
+								minimumFractionDigits: 1,
+								maximumFractionDigits: 1
+							})
+						: '—'}
 				</span>
-				<span class="text-md font-medium text-cream-200/60">kWh</span>
+				<span class="text-md text-cream-200/60 font-medium">kWh</span>
 			</div>
 		</div>
 	</div>
