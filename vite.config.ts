@@ -49,6 +49,8 @@ export default defineConfig({
 			workbox: {
 				globPatterns: ['**/*.{js,css,svg,png,ico}'], // html raus, da kein statisches Shell-Dokument existiert
 				navigateFallback: null,
+				skipWaiting: true,
+    			clientsClaim: true,
 				runtimeCaching: [
 					{
 						urlPattern: ({ request }) => request.mode === 'navigate',
