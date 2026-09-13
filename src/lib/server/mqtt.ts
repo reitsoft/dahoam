@@ -21,7 +21,7 @@ interface SensorState {
 
 const SENSOR_CACHE_PATH = join(process.cwd(), '.sensor-cache.json');
 
-export const CLIENT_ID = `stromzaehler-dashboard-${env.NODE_ENV === 'production' ? 'prod' : 'dev'}`;
+export const CLIENT_ID = `stromzaehler-dashboard-${env.NODE_ENV === 'production' ? 'prod' : 'dev'}-${process.pid}`;
 
 export const mqttEvents = new EventEmitter();
 

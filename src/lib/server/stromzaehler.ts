@@ -80,6 +80,75 @@ export async function getVerbrauchHeute(): Promise<number | null> {
     return result;
 }
 
+export async function getVerbrauchProTagMonat(): Promise<{ tag: number; value: number | null }[]> {
+    const now = new Date();
+    const heuteTag = now.getDate();
+    const tageImMonat = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+    const flux = `
+        import "date"
+        import "timezone"
+
+        option location = timezone.location(name: "Europe/Berlin")
+
+        from(bucket: "stromzaehler_1d")
+            |> range(start: date.truncate(t: now(), unit: 1mo, location: location))
+            |> filter(fn: (r) => r._measurement == "stromzaehler")
+            |> filter(fn: (r) => r._field == "import_active")
+            |> difference(nonNegative: true)
+            |> aggregateWindow(every: 1d, fn: sum, createEmpty: true, location: location)
+    `;
+
+    const werteProTag: Record<number, number> = {};
+
+    for await (const { values, tableMeta } of queryApi.iterateRows(flux)) {
+        const o = tableMeta.toObject(values);
+        const tag = new Date(o._time).getDate();
+        if (o._value !== null && o._value !== undefined) {
+            werteProTag[tag] = o._value;
+        }
+    }
+
+    // Heutigen (unvollständigen) Tag durch Live-Wert aus getVerbrauchHeute() überschreiben
+    const heuteWert = await getVerbrauchHeute();
+    if (heuteWert !== null) {
+        werteProTag[heuteTag] = heuteWert;
+    }
+
+    return Array.from({ length: tageImMonat }, (_, i) => {
+        const tag = i + 1;
+        if (tag > heuteTag) return { tag, value: null };
+        return { tag, value: werteProTag[tag] ?? 0 };
+    });
+}
+
+export async function getVerbrauchVormonat(): Promise<number> {
+    const flux = `
+        import "date"
+        import "timezone"
+
+        option location = timezone.location(name: "Europe/Berlin")
+
+        vormonatsStart = date.truncate(t: date.sub(d: 1mo, from: now()), unit: 1mo, location: location)
+        vormonatsEnde = date.truncate(t: now(), unit: 1mo, location: location)
+
+        from(bucket: "stromzaehler_1d")
+            |> range(start: vormonatsStart, stop: vormonatsEnde)
+            |> filter(fn: (r) => r._measurement == "stromzaehler")
+            |> filter(fn: (r) => r._field == "import_active")
+            |> difference(nonNegative: true)
+            |> sum()
+    `;
+
+    let result = 0;
+    for await (const { values, tableMeta } of queryApi.iterateRows(flux)) {
+        const o = tableMeta.toObject(values);
+        result = o._value ?? 0;
+    }
+
+    return result;
+}
+
 export async function getVerbrauchMonat(): Promise<number | null> {
     const fluxHistorisch = `
         import "date"

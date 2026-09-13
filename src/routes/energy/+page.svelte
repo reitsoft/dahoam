@@ -17,7 +17,7 @@
 
 	<main class="grid min-h-0 w-full flex-1 grid-rows-[auto_11rem_12rem_auto] gap-3 px-4 pb-3">
 		<CardZaehler zaehlerstand={data.zaehlerstand}/>
-		<CardMonat />
+		<CardMonat verbrauchProTag={data.verbrauchProTag} verbrauchVormonat={data.verbrauchVormonat} />
 		<CardJahr />
 		<CardStromfluss />
 	</main>
