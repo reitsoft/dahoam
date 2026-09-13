@@ -157,28 +157,35 @@ export async function getVerbrauchVormonat(): Promise<number> {
 }
 
 export async function getVerbrauchMonat(): Promise<number | null> {
+    // Greift den Zeitraum vom 1. des Monats 00:00 Uhr bis heute 00:00 Uhr ab
     const fluxHistorisch = `
         import "date"
         import "timezone"
         option location = timezone.location(name: "Europe/Berlin")
 
-        from(bucket: "stromzaehler_1h")
-            |> range(
-                start: date.truncate(t: now(), unit: 1mo, location: location),
-                stop: date.truncate(t: now(), unit: 1d, location: location)
-            )
+        startMonat = date.truncate(t: now(), unit: 1mo, location: location)
+        heuteMitternacht = date.truncate(t: now(), unit: 1d, location: location)
+
+        from(bucket: "stromzaehler_1d")
+            |> range(start: startMonat, stop: heuteMitternacht)
             |> filter(fn: (r) => r._measurement == "stromzaehler")
             |> filter(fn: (r) => r._field == "import_active")
-            |> difference(nonNegative: true)
-            |> sum()
+            |> spread()
     `;
 
     let historisch = 0;
-    for await (const { values, tableMeta } of queryApi.iterateRows(fluxHistorisch)) {
-        const o = tableMeta.toObject(values);
-        historisch = o._value ?? 0;
+    try {
+        for await (const { values, tableMeta } of queryApi.iterateRows(fluxHistorisch)) {
+            const o = tableMeta.toObject(values);
+            if (o._value !== undefined && o._value !== null) {
+                historisch = o._value;
+            }
+        }
+    } catch (err) {
+        console.error('❌ Fehler bei getVerbrauchMonat() historisch:', err);
     }
 
+    // Heutigen Live-Verbrauch addieren
     const heute = (await getVerbrauchHeute()) ?? 0;
 
     return historisch + heute;
