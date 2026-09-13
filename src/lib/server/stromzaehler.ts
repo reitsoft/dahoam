@@ -68,9 +68,13 @@ export async function getVerbrauchHeute(): Promise<number | null> {
 
     let result: number | null = null;
 
-    for await (const { values, tableMeta } of queryApi.iterateRows(flux)) {
-        const o = tableMeta.toObject(values);
-        result = o._value;
+    try {
+        for await (const { values, tableMeta } of queryApi.iterateRows(flux)) {
+            const o = tableMeta.toObject(values);
+            result = o._value;
+        }
+    } catch (err) {
+        console.error('❌ Influx-Query fehlgeschlagen:', err);
     }
 
     return result;

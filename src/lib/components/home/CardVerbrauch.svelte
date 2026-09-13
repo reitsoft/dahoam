@@ -1,11 +1,7 @@
 <script lang="ts">
-	// Dummy-Daten
-	const strom = {
-		kwhHeute: 4,
-		kostenHeute: '1,08',
-		kwhMonat: 124,
-		kostenMonat: '33,48'
-	};
+	let { strom }: {
+		strom: { kwhHeute: number; kostenHeute: string; kwhMonat: number; kostenMonat: string }
+	} = $props();
 </script>
 
 <!-- Stromverbrauch -->
@@ -13,7 +9,6 @@
 	<span class="pl-2 text-xs font-bold tracking-wide text-cream-100/50 uppercase">Verbrauch</span>
 
 	<div class="grid grid-cols-2 divide-x divide-navy-800">
-		<!-- Verbrauch heute -->
 		<div class="flex items-center gap-3 pr-4 pl-2">
 			<div class="flex min-w-0 flex-1 flex-col justify-center">
 				<div class="flex items-center gap-1.5">
@@ -27,7 +22,6 @@
 			</div>
 		</div>
 
-		<!-- Diesen Monat -->
 		<div class="flex items-center pl-4">
 			<div class="flex min-w-0 flex-1 flex-col justify-center">
 				<div class="flex items-center gap-1.5">
