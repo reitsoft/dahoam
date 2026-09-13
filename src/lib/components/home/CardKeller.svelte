@@ -58,7 +58,7 @@
 					Nicht lüften!
 				{:else}
 					<CircleCheck class="h-3.5 w-3.5 stroke-2" />
-					Lüften möglich.
+					Lüften möglich
 				{/if}
 			</div>
 		{/if}
