@@ -39,6 +39,8 @@
         verbrauchVormonat: number;
     } = $props();
 
+	console.log({ verbrauchProTag, verbrauchVormonat });
+
     // Reaktive Ableitungen via $derived
     const dataPoints = $derived(verbrauchProTag.map((d) => d.value));
     const labels = $derived(verbrauchProTag.map((d) => String(d.tag)));

@@ -85,26 +85,32 @@ export async function getVerbrauchProTagMonat(): Promise<{ tag: number; value: n
     const heuteTag = now.getDate();
     const tageImMonat = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
+    // Range startet 1 Tag vor Monatsanfang, damit Tag 1 eine Differenz hat
     const flux = `
         import "date"
         import "timezone"
 
         option location = timezone.location(name: "Europe/Berlin")
 
+        startMonat = date.truncate(t: now(), unit: 1mo, location: location)
+        startRange = date.add(d: -1d, to: startMonat)
+
         from(bucket: "stromzaehler_1d")
-            |> range(start: date.truncate(t: now(), unit: 1mo, location: location))
+            |> range(start: startRange)
             |> filter(fn: (r) => r._measurement == "stromzaehler")
             |> filter(fn: (r) => r._field == "import_active")
+            |> aggregateWindow(every: 1d, fn: max, createEmpty: false, location: location)
             |> difference(nonNegative: true)
-            |> aggregateWindow(every: 1d, fn: sum, createEmpty: true, location: location)
+            |> filter(fn: (r) => r._time >= startMonat)
     `;
 
     const werteProTag: Record<number, number> = {};
 
     for await (const { values, tableMeta } of queryApi.iterateRows(flux)) {
         const o = tableMeta.toObject(values);
-        const tag = new Date(o._time).getDate();
         if (o._value !== null && o._value !== undefined) {
+            // Datum korrekt in deutscher Zeitzone parsen
+            const tag = new Date(o._time).getDate();
             werteProTag[tag] = o._value;
         }
     }
@@ -117,6 +123,7 @@ export async function getVerbrauchProTagMonat(): Promise<{ tag: number; value: n
 
     return Array.from({ length: tageImMonat }, (_, i) => {
         const tag = i + 1;
+        // Zukünftige Tage im Monat auf null setzen
         if (tag > heuteTag) return { tag, value: null };
         return { tag, value: werteProTag[tag] ?? 0 };
     });
