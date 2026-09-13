@@ -2,8 +2,7 @@
 <script lang="ts">
 	import { Zap } from '@lucide/svelte';
 
-	//Dummy-Daten
-	const ZAEHLERSTAND = 12237.0;
+	let { zaehlerstand }: { zaehlerstand: number } = $props();
 </script>
 
 <div class="flex h-full flex-col justify-center rounded-2xl bg-navy-900 p-3">
@@ -19,7 +18,7 @@
 			</span>
 			<div class="flex items-baseline gap-1">
 				<span class="text-2xl leading-tight font-bold text-cream-100">
-					{ZAEHLERSTAND.toLocaleString('de-DE', {
+					{zaehlerstand.toLocaleString('de-DE', {
 						minimumFractionDigits: 1,
 						maximumFractionDigits: 1
 					})}
