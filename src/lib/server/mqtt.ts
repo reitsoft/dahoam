@@ -187,4 +187,12 @@ if (!globalThis.__mqttClient) {
 			state: current
 		});
 	});
+
+	// Sauberes Beenden beim Stoppen des Dev-Servers / Prozess-Neustart,
+	// damit der MQTT-Socket nicht offen bleibt und den Event-Loop blockiert
+	const shutdown = () => {
+		mqttClient.end(true, {}, () => process.exit(0));
+	};
+	process.on('SIGINT', shutdown);
+	process.on('SIGTERM', shutdown);
 }
