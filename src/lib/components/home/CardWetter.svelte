@@ -8,7 +8,7 @@
 		CloudSun,
 		RefreshCw
 	} from '@lucide/svelte';
-	import { createWeatherStore } from './weatherStore'; // Pfad an deinen Store anpassen
+	import { createWeatherStore } from '$lib/stores/weather.svelte.ts'; // Pfad an deinen Store anpassen
 
 	// Store initialisieren
 	const weather = createWeatherStore();
