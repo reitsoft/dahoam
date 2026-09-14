@@ -22,6 +22,14 @@ export interface WeatherData {
 	windDirectionText: string;
 
 	time: string;
+
+	// Neue Vorhersagedaten für heute
+	today: {
+		tempMax: number;
+		tempMin: number;
+		precipitationSum: number;
+		rainProbability: number;
+	};
 }
 
 export function createWeatherStore(intervalMs: number = 60 * 60 * 1000) {
