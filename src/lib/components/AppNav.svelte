@@ -25,7 +25,7 @@
         {active ? 'text-orange-500' : 'text-cream-100/50'}"
     >
       <item.icon class="w-5 h-5 stroke-2" />
-      <span class="text-[11px] font-semiold tracking-wider uppercase">{item.label}</span>
+      <span class="text-[11px] font-semibold tracking-wider uppercase">{item.label}</span>
     </a>
   {/each}
 </nav>
