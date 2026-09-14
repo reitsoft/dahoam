@@ -2,6 +2,7 @@
   "name": "Dahoam",
   "short_name": "Dahoam",
   "description": "Haus-Steuerung Dashboard",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
