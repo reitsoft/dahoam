@@ -138,6 +138,28 @@
 					<div class="text-xs text-cream-100/50">{weather.data.windDirectionDeg}° Wind</div>
 				</div>
 			</div>
+
+			<!-- Vorhersage für Heute (Min / Max / Regenrisiko) -->
+			{#if weather.data.today}
+				<div class="mt-1 flex items-center justify-between rounded-xl bg-navy-950 p-2 text-xs border border-cream-100/5">
+					<!-- Min / Max Temp -->
+					<div class="flex items-center gap-1.5 pl-1">
+						<span class="text-cream-100/40">Heute:</span>
+						<span class="font-bold text-cream-100">{weather.data.today.tempMax.toFixed(1)}°</span>
+						<span class="text-cream-100/40">/</span>
+						<span class="text-cream-100/60">{weather.data.today.tempMin.toFixed(1)}°</span>
+					</div>
+			
+					<!-- Regenwahrscheinlichkeit -->
+					<div class="flex items-center gap-1 pr-1 text-blue-400">
+						<span class="text-cream-100/40">Regen:</span>
+						<span class="font-semibold">{weather.data.today.rainProbability}%</span>
+						{#if weather.data.today.precipitationSum > 0}
+							<span class="text-cream-100/40">({weather.data.today.precipitationSum} mm)</span>
+						{/if}
+					</div>
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>
