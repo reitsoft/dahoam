@@ -103,7 +103,7 @@
 								{Math.round(h.temperature)}°
 							</span>
 							<!-- Icon -->
-							<span class="text-xl leading-none" role="img" aria-label="">{h.icon}</span>
+							<span class="text-xl leading-none" role="img" aria-label="Regenwahrscheinlichkeit">{h.icon}</span>
 							<!-- Regenwahrscheinlichkeit (nur wenn > 0) -->
 							<span class="h-3 text-[10px] font-semibold text-blue-400">
 								{h.rainProbability > 0 ? `${h.rainProbability}%` : ''}
