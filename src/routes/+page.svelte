@@ -17,7 +17,7 @@
 
 	<AppHeader title="Dahoam is Dahoam" />
 
-	<main class="grid min-h-0 flex-1 grid-rows-[auto_1fr_1.2fr_0.8fr_auto] gap-3 px-4 pb-3">
+	<main class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-3 no-scrollbar">
 		<CardVerbrauch strom={data.strom} />
 		<CardHaus />
 		<CardBad />
