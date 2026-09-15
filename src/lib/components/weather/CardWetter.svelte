@@ -57,7 +57,7 @@
 		</div>
 
 		<!-- Stat-Chips: Regen / Feuchtigkeit / Wind -->
-		<div class="grid grid-cols-3 gap-2 px-4 pb-4">
+		<div class="grid grid-cols-3 gap-2 px-4 pb-3">
 			<div
 				class="flex flex-col items-center gap-1 rounded-2xl border border-cream-100/5 bg-navy-950/50 py-3"
 			>
@@ -87,7 +87,7 @@
 
 		<!-- Stündliche Vorhersage -->
 		{#if d.hourly?.length}
-			<div class="border-t border-cream-100/10 bg-navy-950/40 px-4 py-3">
+			<div class="border-t border-cream-100/10 bg-navy-950/40 px-4 py-2">
 				<!-- Header mit Icon + Titel -->
 				<div class="mb-3 flex items-center gap-2 px-1">
 					<Clock class="h-3.5 w-3.5 text-cream-100/50" />
