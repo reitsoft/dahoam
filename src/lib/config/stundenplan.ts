@@ -21,44 +21,46 @@ export const WOCHENTAGE: { key: Wochentag; label: string }[] = [
 
 export const STUNDENPLAN: Record<Wochentag, Stunde[]> = {
 	montag: [
-		{ nummer: 1, von: '08:00', bis: '08:45', fach: 'Mathematik', raum: 'R 204', lehrer: 'Fr. Weber' },
-		{ nummer: 2, von: '08:50', bis: '09:35', fach: 'Deutsch', raum: 'R 204', lehrer: 'Hr. Schmidt' },
-		{ nummer: 3, von: '09:55', bis: '10:40', fach: 'Englisch', raum: 'R 118', lehrer: 'Fr. Klein' },
-		{ nummer: 4, von: '10:45', bis: '11:30', fach: 'Sport', raum: 'Halle 2', lehrer: 'Hr. Bauer' },
-		{ nummer: 5, von: '11:50', bis: '12:35', fach: 'Biologie', raum: 'R 310', lehrer: 'Fr. Hoffmann' },
-		{ nummer: 6, von: '12:40', bis: '13:25', fach: 'Kunst', raum: 'R 015', lehrer: 'Hr. Lange' }
+		{ nummer: 1, von: '08:15', bis: '09:00', fach: 'Deutsch', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 2, von: '09:30', bis: '10:15', fach: 'Englsich', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 3, von: '10:15', bis: '11:00', fach: 'Sachunterricht', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 4, von: '11:15', bis: '12:00', fach: 'Sport (BSS)', raum: 'Turnhalle', lehrer: 'Hr. Arnold' },
+		{ nummer: 5, von: '12:00', bis: '12:45', fach: 'Mathematik', raum: 'R 106', lehrer: 'Fr. Rendler' },
+		{ nummer: 6, von: '13:45', bis: '15:00', fach: 'Hausaufgaben', raum: 'R 106', lehrer: 'Fr. YYY' }
 	],
 	dienstag: [
-		{ nummer: 1, von: '08:00', bis: '08:45', fach: 'Physik', raum: 'R 220', lehrer: 'Hr. Fischer' },
-		{ nummer: 2, von: '08:50', bis: '09:35', fach: 'Mathematik', raum: 'R 204', lehrer: 'Fr. Weber' },
-		{ nummer: 3, von: '09:55', bis: '10:40', fach: 'Geschichte', raum: 'R 112', lehrer: 'Hr. Wolf' },
-		{ nummer: 4, von: '10:45', bis: '11:30', fach: 'Deutsch', raum: 'R 204', lehrer: 'Hr. Schmidt' },
-		{ nummer: 5, von: '11:50', bis: '12:35', fach: 'Musik', raum: 'R 008', lehrer: 'Fr. Krause' },
-		{ nummer: 6, von: '12:40', bis: '13:25', fach: 'Chemie', raum: 'R 301', lehrer: 'Fr. Neumann' }
+		{ nummer: 1, von: '08:15', bis: '09:00', fach: 'Deutsch', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 2, von: '09:30', bis: '10:15', fach: 'Sachunterricht', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 3, von: '10:15', bis: '11:00', fach: 'Mathematik', raum: 'R 106', lehrer: 'Fr. Rendler' },
+		{ nummer: 4, von: '11:15', bis: '12:00', fach: 'Sport (BSS)', raum: 'Turnhalle', lehrer: 'Hr. Arnold' },
+		{ nummer: 5, von: '12:00', bis: '12:45', fach: 'Sport (BSS)', raum: 'Turnhalle', lehrer: 'Hr. Arnold' },
+		{ nummer: 6, von: '13:45', bis: '15:00', fach: 'Hausaufgaben', raum: 'R 106', lehrer: 'Fr. YYY' }
 	],
 	mittwoch: [
-		{ nummer: 1, von: '08:00', bis: '08:45', fach: 'Englisch', raum: 'R 118', lehrer: 'Fr. Klein' },
-		{ nummer: 2, von: '08:50', bis: '09:35', fach: 'Mathematik', raum: 'R 204', lehrer: 'Fr. Weber' },
-		{ nummer: 3, von: '09:55', bis: '10:40', fach: 'Sport', raum: 'Halle 1', lehrer: 'Hr. Bauer' },
-		{ nummer: 4, von: '10:45', bis: '11:30', fach: 'Erdkunde', raum: 'R 209', lehrer: 'Hr. Richter' },
-		{ nummer: 5, von: '11:50', bis: '12:35', fach: 'Deutsch', raum: 'R 204', lehrer: 'Hr. Schmidt' },
-		{ nummer: 6, von: '12:40', bis: '13:25', fach: 'Informatik', raum: 'R 401', lehrer: 'Fr. Peters' }
+		{ nummer: 1, von: '07:30', bis: '08:15', fach: 'Kunst und Werken', raum: 'R 106/Kunstraum', lehrer: 'Fr. XXX' },
+		{ nummer: 2, von: '08:15', bis: '09:00', fach: 'Kunst und Werken', raum: 'R 106/Kunstraum', lehrer: 'Fr. XXX' },
+		{ nummer: 3, von: '09:30', bis: '10:15', fach: 'Deutsch', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 4, von: '10:15', bis: '11:00', fach: 'Deutsch', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 5, von: '11:15', bis: '12:00', fach: 'Musik', raum: 'R 209', lehrer: 'Hr. Richter' },
+		{ nummer: 6, von: '12:00', bis: '12:45', fach: 'Englsich', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 7, von: '13:45', bis: '15:00', fach: 'Hausaufgaben', raum: 'R 106', lehrer: 'Fr. YYY' }
 	],
 	donnerstag: [
-		{ nummer: 1, von: '08:00', bis: '08:45', fach: 'Biologie', raum: 'R 310', lehrer: 'Fr. Hoffmann' },
-		{ nummer: 2, von: '08:50', bis: '09:35', fach: 'Englisch', raum: 'R 118', lehrer: 'Fr. Klein' },
-		{ nummer: 3, von: '09:55', bis: '10:40', fach: 'Mathematik', raum: 'R 204', lehrer: 'Fr. Weber' },
-		{ nummer: 4, von: '10:45', bis: '11:30', fach: 'Religion', raum: 'R 015', lehrer: 'Hr. Vogel' },
-		{ nummer: 5, von: '11:50', bis: '12:35', fach: 'Physik', raum: 'R 220', lehrer: 'Hr. Fischer' },
-		{ nummer: 6, von: '12:40', bis: '13:25', fach: 'Kunst', raum: 'R 015', lehrer: 'Hr. Lange' }
+		{ nummer: 1, von: '08:15', bis: '09:00', fach: 'Deutsch', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 2, von: '09:30', bis: '10:15', fach: 'Mathematik', raum: 'R 106', lehrer: 'Fr. Rendler' },
+		{ nummer: 3, von: '10:15', bis: '11:00', fach: 'Mathematik', raum: 'R 106', lehrer: 'Fr. Rendler' },
+		{ nummer: 4, von: '11:15', bis: '12:00', fach: 'Reli / Werte', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 5, von: '12:00', bis: '12:45', fach: 'Sachunterricht', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 6, von: '13:45', bis: '15:00', fach: 'Hausaufgaben', raum: 'R 106', lehrer: 'Fr. YYY' }
 	],
 	freitag: [
-		{ nummer: 1, von: '08:00', bis: '08:45', fach: 'Deutsch', raum: 'R 204', lehrer: 'Hr. Schmidt' },
-		{ nummer: 2, von: '08:50', bis: '09:35', fach: 'Chemie', raum: 'R 301', lehrer: 'Fr. Neumann' },
-		{ nummer: 3, von: '09:55', bis: '10:40', fach: 'Mathematik', raum: 'R 204', lehrer: 'Fr. Weber' },
-		{ nummer: 4, von: '10:45', bis: '11:30', fach: 'Sport', raum: 'Halle 2', lehrer: 'Hr. Bauer' },
-		{ nummer: 5, von: '11:50', bis: '12:35', fach: 'Englisch', raum: 'R 118', lehrer: 'Fr. Klein' },
-		{ nummer: 6, von: '12:40', bis: '13:25', fach: 'Geschichte', raum: 'R 112', lehrer: 'Hr. Wolf' }
+		{ nummer: 1, von: '07:30', bis: '08:15', fach: 'Mathematik', raum: 'R 106', lehrer: 'Fr. Rendler' },
+		{ nummer: 2, von: '08:15', bis: '09:00', fach: 'Deutsch', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 3, von: '09:30', bis: '10:15', fach: 'KL', raum: 'R 106', lehrer: 'Fr. XXX' },
+		{ nummer: 4, von: '10:15', bis: '11:00', fach: 'Reli / Werte', raum: 'R 106', lehrer: 'Fr. Mauch' },
+		{ nummer: 5, von: '11:15', bis: '12:00', fach: 'Musik', raum: 'Musikraum', lehrer: 'Hr. Blum' },
+		{ nummer: 6, von: '12:00', bis: '12:45', fach: 'Mathematik', raum: 'R 106', lehrer: 'Fr. Rendler' },
+		{ nummer: 7, von: '13:45', bis: '15:00', fach: 'Hausaufgaben', raum: 'R 106', lehrer: 'Fr. YYY' }
 	]
 };
 
