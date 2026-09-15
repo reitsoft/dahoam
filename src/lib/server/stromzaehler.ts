@@ -1,8 +1,11 @@
 import { InfluxDB } from '@influxdata/influxdb-client';
 import { env } from '$env/dynamic/private';
 
-const client = new InfluxDB({ url: env.INFLUX_URL, token: env.INFLUX_TOKEN });
-const queryApi = client.getQueryApi(env.INFLUX_ORG);
+const client = new InfluxDB({
+    url: env.INFLUX_URL ?? 'http://192.168.0.100:8086',
+    token: env.INFLUX_TOKEN ?? ''
+});
+const queryApi = client.getQueryApi(env.INFLUX_ORG ?? '');
 
 type DatenPunkt = { time: string; value: number | null };
 

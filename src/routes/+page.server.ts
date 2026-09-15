@@ -1,6 +1,6 @@
 // routes/+page.server.ts
 import { env } from '$env/dynamic/private';
-import { getVerbrauchHeute, getVerbrauchMonat } from '$lib/server/stromzaehler';
+import { getVerbrauchHeute, getVerbrauchMonat } from '$lib/server/stromzaehler.index';
 
 const formatEuro = (n: number) => {
     if (isNaN(n) || n === null || n === undefined) return '0,00';

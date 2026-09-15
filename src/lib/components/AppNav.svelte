@@ -1,12 +1,13 @@
 <script lang="ts">
   import { page } from '$app/state';
   import { resolve } from '$app/paths';
-  import { House, PanelsTopLeft, Zap } from '@lucide/svelte';
+  import { House, PanelsTopLeft, Zap, SunIcon } from '@lucide/svelte';
 
   const items = [
     { href: resolve('/'), label: 'Haus', icon: House },
     { href: resolve('/shutters'), label: 'Rollos', icon: PanelsTopLeft },
-    { href: resolve('/energy'), label: 'Energie', icon: Zap }
+    { href: resolve('/energy'), label: 'Energie', icon: Zap },
+    { href: resolve('/weather'), label: 'Wetter', icon: SunIcon },
   ];
 </script>
 

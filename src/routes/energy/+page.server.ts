@@ -1,4 +1,4 @@
-import { getAktuellerZaehlerstand, getVerbrauchProTagMonat, getVerbrauchVormonat  } from '$lib/server/stromzaehler';
+import { getAktuellerZaehlerstand, getVerbrauchProTagMonat, getVerbrauchVormonat  } from '$lib/server/stromzaehler.index';
 
 export const load = async () => {
 	const [zaehlerstand, verbrauchProTag, verbrauchVormonat] = await Promise.all([
@@ -6,7 +6,6 @@ export const load = async () => {
 		getVerbrauchProTagMonat(),
 		getVerbrauchVormonat()
 	]);
-	console.log({zaehlerstand, verbrauchProTag, verbrauchVormonat });
 
 	return {zaehlerstand, verbrauchProTag, verbrauchVormonat };
 };

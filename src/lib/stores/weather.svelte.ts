@@ -5,7 +5,7 @@ export interface WeatherData {
 	temperatureUnit: string;
 	humidity: number;
 	humidityUnit: string;
-	
+
 	// Wetterzustand & WMO
 	weatherCode: number;
 	condition: string;
@@ -30,9 +30,25 @@ export interface WeatherData {
 		precipitationSum: number;
 		rainProbability: number;
 	};
+
+	hourly: {
+		time: string;           // ISO
+		temperature: number;
+		icon: string;            // Emoji, wie bei d.icon
+		rainProbability: number; // %
+	}[],
+
+	daily: {
+		date: string;         // ISO-Datum
+		tempMax: number;
+		tempMin: number;
+		icon: string;
+		condition: string;
+		rainProbability: number;
+	}[];
 }
 
-export function createWeatherStore(intervalMs: number = 60 * 60 * 1000) {
+export function createWeatherStore(intervalMs: number = 15 * 60 * 1000) {
 	let data = $state<WeatherData | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
