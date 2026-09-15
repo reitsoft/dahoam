@@ -54,9 +54,9 @@
 <Viewport>
 	<AppHeader title="Rollos" />
 
-	<main class="grid w-full max-w-md min-h-0 flex-1 grid-rows-9 gap-2 px-4 py-2">
+	<main class="flex w-full min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 py-2 no-scrollbar">
 		{#if isConnecting}
-			<div class="col-span-full row-span-full flex flex-col items-center justify-center gap-3 text-cream-100/50">
+			<div class="flex flex-1 flex-col items-center justify-center gap-3 text-cream-100/50">
 				<LoaderCircle class="h-6 w-6 animate-spin text-teal-500" />
 				<span class="text-xs font-bold tracking-wider uppercase">Verbinde…</span>
 			</div>
@@ -69,7 +69,7 @@
 
 	{#snippet footer()}
 		<footer class="shrink-0 bg-navy-950 p-4">
-			<div class="mx-auto grid w-full max-w-md grid-cols-3 gap-3">
+			<div class="mx-auto grid w-full grid-cols-3 gap-3">
 				<button
 					type="button"
 					onclick={() => allTo(10, 'close')}
