@@ -1,13 +1,14 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { resolve } from '$app/paths';
-  import { House, PanelsTopLeft, Zap, SunIcon } from '@lucide/svelte';
+  import { House, PanelsTopLeft, Zap, SunIcon, School, School2, SchoolIcon, LucideSchool, LucideSquareCenterlineDashedHorizontal } from '@lucide/svelte';
 
   const items = [
     { href: resolve('/'), label: 'Haus', icon: House },
     { href: resolve('/shutters'), label: 'Rollos', icon: PanelsTopLeft },
     { href: resolve('/energy'), label: 'Energie', icon: Zap },
     { href: resolve('/weather'), label: 'Wetter', icon: SunIcon },
+    { href: resolve('/school'), label: 'Schule', icon: School },
   ];
 </script>
 
