@@ -5,5 +5,12 @@
     "uhrzeit": "19:30",
     "titel": "Elternabend?",
     "notizen": "Datum Prüfen"
+  },
+  {
+    "id": "97dddb37-9920-462c-8ed0-0637c26a3294",
+    "datum": "2026-09-17",
+    "uhrzeit": "10:00",
+    "titel": "Test",
+    "notizen": "neue notiz"
   }
 ]

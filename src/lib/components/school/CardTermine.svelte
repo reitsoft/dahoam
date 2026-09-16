@@ -60,12 +60,14 @@
 	}
 </script>
 
-<div class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-navy-800 bg-navy-900 shadow-lg">
+<div
+	class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-navy-800 bg-navy-900 shadow-lg"
+>
 	<!-- Header -->
 	<div class="flex shrink-0 items-center justify-between px-5 pt-5 pb-1">
 		<div class="flex items-center gap-2">
 			<CalendarClock class="h-3.5 w-3.5 text-cream-100/50" />
-			<span class="text-xs font-semibold text-cream-100/70">Termine</span>
+			<span class="text-base font-semibold text-cream-100/70">Termine</span>
 		</div>
 		<button
 			type="button"
@@ -73,13 +75,13 @@
 				formularOffen = !formularOffen;
 				if (!formularOffen) formularZuruecksetzen();
 			}}
-			class="flex items-center gap-1 rounded-full bg-navy-800 px-2.5 py-1 text-[11px] font-medium text-cream-100/70 hover:text-cream-100"
+			class="flex items-center gap-1 rounded-full bg-navy-800 px-2.5 py-1.5 text-xs font-medium text-cream-100/70 hover:text-cream-100"
 		>
 			{#if formularOffen}
-				<X class="h-3 w-3" />
+				<X class="h-4 w-4" />
 				Abbrechen
 			{:else}
-				<Plus class="h-3 w-3" />
+				<Plus class="h-4 w-4" />
 				Neu
 			{/if}
 		</button>
@@ -87,7 +89,9 @@
 
 	<!-- Formular -->
 	{#if formularOffen}
-		<div class="mx-3 mt-2 flex shrink-0 flex-col gap-2 rounded-2xl border border-cream-100/10 bg-navy-950/50 p-3">
+		<div
+			class="mx-3 mt-2 flex shrink-0 flex-col gap-2 rounded-2xl border border-cream-100/10 bg-navy-950/50 p-3"
+		>
 			<div class="flex gap-2">
 				<input
 					type="date"
@@ -129,10 +133,12 @@
 	{/if}
 
 	<!-- Terminliste -->
-	<div class="flex flex-1 flex-col gap-1.5 overflow-y-auto px-3 py-3">
+	<div class="flex flex-1 flex-col gap-2 overflow-y-auto px-3 py-3">
 		{#if store.loading}
 			<div class="flex flex-1 items-center justify-center">
-				<div class="h-5 w-5 animate-spin rounded-full border-2 border-teal-500 border-t-transparent"></div>
+				<div
+					class="h-5 w-5 animate-spin rounded-full border-2 border-teal-500 border-t-transparent"
+				></div>
 			</div>
 		{:else if store.error}
 			<p class="text-center text-xs text-rose-400">{store.error}</p>
@@ -143,22 +149,29 @@
 		{:else}
 			{#each store.termine as termin (termin.id)}
 				{@const vergangen = istVergangen(termin.datum, termin.uhrzeit)}
-				<div
-					class="flex items-start gap-3 rounded-2xl px-3 py-2.5 {vergangen
-						? 'opacity-40'
-						: 'bg-navy-950/40'}"
-				>
-					<div class="flex w-14 shrink-0 flex-col items-center rounded-xl bg-navy-800 py-1.5">
-						<span class="text-[10px] font-semibold text-cream-100/50">
-							{formatDatum(termin.datum)}
+				<div class="flex items-center gap-2 rounded-2xl bg-navy-950/30 px-3 py-2 {vergangen ? 'opacity-40' : ''}">
+					<!-- Datum: Monat, Tag, Uhrzeit – zentriert -->
+					<div class="flex w-12 shrink-0 flex-col items-center">
+						<span
+							class="w-full text-center text-[10px] font-semibold tracking-wide text-cream-100/40 uppercase"
+						>
+							{new Date(termin.datum).toLocaleDateString('de-DE', { month: 'short' })}
 						</span>
-						<span class="text-xs font-bold text-cream-100">{termin.uhrzeit}</span>
+						<span class="w-full text-center text-2xl leading-none font-bold text-cream-100">
+							{new Date(termin.datum).getDate()}
+						</span>
+						<div class="w-full text-center text-xs text-cream-100/50">
+							{termin.uhrzeit}
+						</div>
 					</div>
 
+					<!-- Inhalt: Titel, dann Notizen -->
 					<div class="min-w-0 flex-1">
-						<div class="truncate text-sm font-semibold text-cream-100">{termin.titel}</div>
+						<div class="truncate text-base font-semibold text-cream-100">
+							{termin.titel}
+						</div>
 						{#if termin.notizen}
-							<div class="mt-0.5 text-[11px] text-cream-100/40">{termin.notizen}</div>
+							<div class="mt-0.5 truncate text-sm text-cream-100/40">{termin.notizen}</div>
 						{/if}
 					</div>
 
@@ -168,7 +181,7 @@
 						class="shrink-0 rounded-full p-1.5 text-cream-100/30 hover:bg-rose-500/10 hover:text-rose-400"
 						aria-label="Termin löschen"
 					>
-						<TrashIcon class="h-3.5 w-3.5" />
+						<TrashIcon class="h-4.5 w-4.5" />
 					</button>
 				</div>
 			{/each}

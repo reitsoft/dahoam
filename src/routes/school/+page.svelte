@@ -1,12 +1,8 @@
 <script lang="ts">
-	import type { PageProps } from './$types';
-
 	import Viewport from '$lib/components/Viewport.svelte';
 	import AppHeader from '$lib/components/AppHeader.svelte';
 	import CardStundenplan from '$lib/components/school/CardStundenplan.svelte';
 	import CardTermine from '$lib/components/school/CardTermine.svelte';
-
-	let { data }: PageProps = $props();
 </script>
 
 <Viewport>
