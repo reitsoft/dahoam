@@ -26,7 +26,7 @@ export const STUNDENPLAN: Record<Wochentag, Stunde[]> = {
 		{ nummer: 3, von: '10:15', bis: '11:00', fach: 'Sachunterricht', raum: 'R 106', lehrer: 'Fr. Mauch' },
 		{ nummer: 4, von: '11:15', bis: '12:00', fach: 'Sport (BSS)', raum: 'Turnhalle', lehrer: 'Hr. Arnold' },
 		{ nummer: 5, von: '12:00', bis: '12:45', fach: 'Mathematik', raum: 'R 106', lehrer: 'Fr. Rendler' },
-		{ nummer: 6, von: '13:45', bis: '15:00', fach: 'Hausaufgaben', raum: 'R 106', lehrer: 'Fr. YYYY' }
+		{ nummer: 6, von: '13:45', bis: '15:00', fach: 'Hausaufgaben', raum: 'R 106', lehrer: 'Fr. YYY' }
 	],
 	dienstag: [
 		{ nummer: 1, von: '08:15', bis: '09:00', fach: 'Deutsch', raum: 'R 106', lehrer: 'Fr. Mauch' },
