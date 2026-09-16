@@ -157,7 +157,7 @@
 						>
 							{new Date(termin.datum).toLocaleDateString('de-DE', { month: 'short' })}
 						</span>
-						<span class="w-full text-center text-2xl leading-none font-bold text-cream-100">
+						<span class="w-full text-center text-xl leading-none font-bold text-cream-100">
 							{new Date(termin.datum).getDate()}
 						</span>
 						<div class="w-full text-center text-xs text-cream-100/50">

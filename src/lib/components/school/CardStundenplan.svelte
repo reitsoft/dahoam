@@ -61,20 +61,20 @@
 								: ''}"
 						>
 							<div
-								class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold {aktiv
+								class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold {aktiv
 									? 'bg-teal-500/20 text-teal-400'
 									: 'bg-navy-950/50 text-cream-100/40'}"
 							>
 								{stunde.nummer}
 							</div>
-							<div class="flex w-16 shrink-0 flex-col">
+							<div class="flex w-12 shrink-0 flex-col">
 								<span class="text-xs font-semibold text-cream-100">{stunde.von}</span>
 								<span class="text-[10px] text-cream-100/40">{stunde.bis}</span>
 							</div>
 							<div class="flex flex-1 flex-col">
-								<span class="text-base font-semibold text-cream-100">{stunde.fach}</span>
+								<span class="text-sm font-semibold text-cream-100">{stunde.fach}</span>
 								{#if stunde.raum || stunde.lehrer}
-									<span class="text-sm text-cream-100/40">
+									<span class="text-[12px] text-cream-100/40">
 										{stunde.raum}{stunde.raum && stunde.lehrer ? ' · ' : ''}{stunde.lehrer}
 									</span>
 								{/if}
