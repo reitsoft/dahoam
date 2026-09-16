@@ -20,9 +20,9 @@ jobs:
           ssh -t -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             set -e
             cd /opt/apps/dahoam
-            git rm --cached .termine.json --ignore-unmatch
-            git checkout -- .termine.json 2>/dev/null || true
+            mv -f .termine.json /tmp/termine-backup.json 2>/dev/null || true
             git pull --ff-only origin main
+            mv -f /tmp/termine-backup.json .termine.json 2>/dev/null || true
             pnpm install --frozen-lockfile
             pnpm build
             pm2 restart dahoam
