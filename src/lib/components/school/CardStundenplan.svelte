@@ -34,13 +34,13 @@
 		<div class="flex items-center gap-2">
 			{#if ansicht === 'tag'}
 				<BookOpen class="h-3.5 w-3.5 text-cream-100/50" />
-				<span class="text-base font-semibold text-cream-100/70">Stundenplan · {heutigesLabel}</span>
+				<span class="text-base font-semibold text-cream-100/70">{heutigesLabel}</span>
 			{:else if ansicht === 'woche'}
 				<CalendarRange class="h-3.5 w-3.5 text-cream-100/50" />
-				<span class="text-xs font-semibold text-cream-100/70">Wochenstundenplan</span>
+				<span class="text-base font-semibold text-cream-100/70">Woche</span>
 			{:else}
 				<TreePalm class="h-3.5 w-3.5 text-cream-100/50" />
-				<span class="text-xs font-semibold text-cream-100/70">Ferien &amp; freie Tage</span>
+				<span class="text-base font-semibold text-cream-100/70">Ferien </span>
 			{/if}
 		</div>
 
