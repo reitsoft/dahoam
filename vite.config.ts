@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite';
 import adapter from '@sveltejs/adapter-node';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	plugins: [
@@ -61,7 +61,17 @@ export default defineConfig({
 			}
 		})
 	],
+	test: {
+		// Füge diese Zeile hinzu:
+		environment: 'jsdom',
+		
+		// Optional: Macht `describe`, `it`, `expect` global verfügbar (kein manueller Import nötig)
+		globals: true
+	},
 	ssr: {
         noExternal: ['layerchart', 'd3-sankey', 'd3-path', 'd3-shape']
-    }
+    },
+	resolve: {
+		conditions: process.env.VITEST ? ['browser'] : []
+	}
 });
