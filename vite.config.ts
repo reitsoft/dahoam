@@ -5,6 +5,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+	cacheDir: 'node_modules/.vite',
 	plugins: [
 		tailwindcss(),
 		sveltekit({
@@ -66,7 +67,8 @@ export default defineConfig({
 		environment: 'jsdom',
 		
 		// Optional: Macht `describe`, `it`, `expect` global verfügbar (kein manueller Import nötig)
-		globals: true
+		globals: true,
+
 	},
 	ssr: {
         noExternal: ['layerchart', 'd3-sankey', 'd3-path', 'd3-shape']
