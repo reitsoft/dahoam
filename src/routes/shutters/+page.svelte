@@ -5,7 +5,10 @@
 	import ShutterRow from '$lib/components/shutters/ShutterRow.svelte';
 	import { shutterStore } from '$lib/stores/shutters.sse.svelte';
 	import { SHUTTER_LIST } from '$lib/config/shutters';
-	import { ArrowUp, ArrowDown, Octagon, LoaderCircle } from '@lucide/svelte';
+	import ArrowUp from '@lucide/svelte/icons/arrow-up';
+import ArrowDown from '@lucide/svelte/icons/arrow-down';
+import Octagon from '@lucide/svelte/icons/octagon';
+import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 
 	$effect(() => {
 		const disconnect = shutterStore.connect();

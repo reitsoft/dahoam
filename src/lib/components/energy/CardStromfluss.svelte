@@ -1,7 +1,7 @@
 <!-- $lib/components/energy/CardStromflussV2.svelte -->
 <script lang="ts">
     import type { ChartData, ChartOptions } from 'chart.js';
-    import { Waypoints } from '@lucide/svelte';
+    import Waypoints from '@lucide/svelte/icons/waypoints';
     import { Chart as SvelteChart } from 'svelte-chartjs';
     import { Chart as ChartJS, Tooltip } from 'chart.js';
     import { SankeyController, Flow } from 'chartjs-chart-sankey';

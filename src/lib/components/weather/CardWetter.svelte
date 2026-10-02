@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { Droplet, Wind, CloudRain, Clock } from '@lucide/svelte';
+	import Droplet from '@lucide/svelte/icons/droplet';
+import Wind from '@lucide/svelte/icons/wind';
+import CloudRain from '@lucide/svelte/icons/cloud-rain';
+import Clock from '@lucide/svelte/icons/clock';
 	import { createWeatherStore } from '$lib/stores/weather.svelte';
 
 	const weather = createWeatherStore();

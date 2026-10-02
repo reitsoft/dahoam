@@ -24,7 +24,7 @@
 <svelte:head>
 	<link rel="icon" href={favicon} />
 	{#if webManifestHref}
-		<link rel="manifest" href={webManifestHref} />
+		<link rel="manifest" href={webManifestHref} crossorigin="use-credentials" />
 	{/if}
 </svelte:head>
 

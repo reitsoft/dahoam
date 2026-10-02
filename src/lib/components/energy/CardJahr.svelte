@@ -1,6 +1,6 @@
 <!-- src/lib/components/energy/CardJahr.svelte -->
 <script lang="ts">
-	import { ChartNoAxesColumnIncreasing } from '@lucide/svelte';
+	import ChartNoAxesColumnIncreasing from '@lucide/svelte/icons/chart-no-axes-column-increasing';
 	import { Bar } from 'svelte-chartjs';
 	import {
 		Chart as ChartJS,

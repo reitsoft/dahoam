@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { Droplet, Fan, Power, Sparkles, Thermometer } from '@lucide/svelte';
+	import Droplet from '@lucide/svelte/icons/droplet';
+import Fan from '@lucide/svelte/icons/fan';
+import Power from '@lucide/svelte/icons/power';
+import Sparkles from '@lucide/svelte/icons/sparkles';
+import Thermometer from '@lucide/svelte/icons/thermometer';
 
 	type Modus = 'AUTO' | 'TIMER' | 'AUS';
 

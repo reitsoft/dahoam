@@ -1,6 +1,9 @@
 <!-- $lib/components/home/CardHaus.svelte -->
 <script lang="ts">
-	import { Droplets, Flame, Thermometer, WavesHorizontal } from '@lucide/svelte';
+	import Droplets from '@lucide/svelte/icons/droplets';
+import Flame from '@lucide/svelte/icons/flame';
+import Thermometer from '@lucide/svelte/icons/thermometer';
+import WavesHorizontal from '@lucide/svelte/icons/waves-horizontal';
 
 	// Dummy-Daten
 	const heizung = { temp: 21.4, an: true };

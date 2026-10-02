@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { RotateCcwClock, Calendar } from '@lucide/svelte';
+    import RotateCcwClock from '@lucide/svelte/icons/rotate-ccw-clock';
+import Calendar from '@lucide/svelte/icons/calendar';
     import { Bar } from 'svelte-chartjs';
     import {
         Chart as ChartJS,

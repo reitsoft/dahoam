@@ -1,6 +1,9 @@
 <!-- src/lib/components/home/CardTermine.svelte -->
 <script lang="ts">
-	import { CalendarClock, Plus, TrashIcon, X } from '@lucide/svelte';
+	import CalendarClock from '@lucide/svelte/icons/calendar-clock';
+import Plus from '@lucide/svelte/icons/plus';
+import TrashIcon from '@lucide/svelte/icons/trash';
+import X from '@lucide/svelte/icons/x';
 	import { createTermineStore } from '$lib/stores/termine.svelte';
 
 	const store = createTermineStore();

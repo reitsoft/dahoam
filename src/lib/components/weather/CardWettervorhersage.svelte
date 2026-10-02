@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CalendarDays } from '@lucide/svelte';
+	import CalendarDays from '@lucide/svelte/icons/calendar-days';
 	import { createWeatherStore } from '$lib/stores/weather.svelte';
 
 	const weather = createWeatherStore();

@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { Check, ChevronsRight, FingerprintPattern } from '@lucide/svelte';
+	import Check from '@lucide/svelte/icons/check';
+import ChevronsRight from '@lucide/svelte/icons/chevrons-right';
+import FingerprintPattern from '@lucide/svelte/icons/fingerprint-pattern';
 
 	// Türöffner (Slide to Unlock)
 	const TUER_KNOB_GROESSE = 48;

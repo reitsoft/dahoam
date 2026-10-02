@@ -1,6 +1,6 @@
 <!-- src/lib/components/energy/CardZaehler.svelte -->
 <script lang="ts">
-	import { Zap } from '@lucide/svelte';
+	import Zap from '@lucide/svelte/icons/zap';
 
 	let { zaehlerstand }: { zaehlerstand: number | null } = $props();
 </script>

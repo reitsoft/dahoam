@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { BatteryFull, BatteryLow, CircleCheck, Droplet, TriangleAlert, Thermometer } from '@lucide/svelte';
+	import BatteryFull from '@lucide/svelte/icons/battery-full';
+import BatteryLow from '@lucide/svelte/icons/battery-low';
+import CircleCheck from '@lucide/svelte/icons/circle-check';
+import Droplet from '@lucide/svelte/icons/droplet';
+import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
+import Thermometer from '@lucide/svelte/icons/thermometer';
 
 	import { kondensationsRisiko } from '$lib/utilities/taupunkt';
 	import { createWeatherStore } from '$lib/stores/weather.svelte';

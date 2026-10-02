@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { BookOpen, Clock, CalendarRange, TreePalm } from '@lucide/svelte';
+	import BookOpen from '@lucide/svelte/icons/book-open';
+import Clock from '@lucide/svelte/icons/clock';
+import CalendarRange from '@lucide/svelte/icons/calendar-range';
+import TreePalm from '@lucide/svelte/icons/tree-palm';
 	import { STUNDENPLAN, WOCHENTAGE, heutigerWochentag } from '$lib/config/stundenplan';
 	import { FERIEN, BEWEGLICHE_TAGE_HINWEIS, BEWEGLICHE_TAGE } from '$lib/config/ferien';
 
