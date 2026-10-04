@@ -6,7 +6,8 @@
 	import AppHeader from '$lib/components/AppHeader.svelte';
 	import CardZaehler from '$lib/components/energy/CardZaehler.svelte';
 	import CardMonat from '$lib/components/energy/CardMonat.svelte';
-	import CardJahr from '$lib/components/energy/CardJahr.svelte';
+	//import CardJahr from '$lib/components/energy/CardJahr.svelte';
+	import CardJahrHaushalt from '$lib/components/energy/CardJahrHaushalt.svelte';
 	import CardStromfluss from '$lib/components/energy/CardStromfluss.svelte';
 
 	let { data }: PageProps = $props();
@@ -18,7 +19,7 @@
 	<main class="grid min-h-0 w-full flex-1 grid-rows-[auto_10rem_11rem_auto] gap-3 px-4 pb-3">
 		<CardZaehler zaehlerstand={data.zaehlerstand}/>
 		<CardMonat verbrauchProTag={data.verbrauchProTag} verbrauchVormonat={data.verbrauchVormonat} />
-		<CardJahr />
+		<CardJahrHaushalt data={data.verbrauchJahr} />
 		<CardStromfluss />
 	</main>
 </Viewport>
