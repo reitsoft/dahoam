@@ -1,11 +1,5 @@
-import { InfluxDB } from '@influxdata/influxdb-client';
 import { env } from '$env/dynamic/private';
-
-const client = new InfluxDB({
-    url: env.INFLUX_URL ?? 'http://192.168.0.100:8086',
-    token: env.INFLUX_TOKEN ?? ''
-});
-const queryApi = client.getQueryApi(env.INFLUX_ORG ?? '');
+import { queryApi } from './influxClient';
 
 type DatenPunkt = { time: string; value: number | null };
 
@@ -238,52 +232,6 @@ export async function getAktuelleLeistung(): Promise<number | null> {
     }
 
     return result;
-}
-
-export async function getVerbrauchProMonatJahr(): Promise<(number | null)[]> {
-    const now = new Date();
-    const aktuellerMonatIdx = now.getMonth(); // Im Oktober = 9
-
-    const flux = `
-        import "date"
-        import "timezone"
-
-        option location = timezone.location(name: "Europe/Berlin")
-
-        startJahr = date.truncate(t: now(), unit: 1y, location: location)
-        // 1 Monat VOR Jahresanfang starten, damit der Januar/erste vorhandene Monat einen Vorgänger hat
-        startRange = date.add(d: -1mo, to: startJahr)
-
-        from(bucket: "stromzaehler_1d")
-            |> range(start: startRange)
-            |> filter(fn: (r) => r._measurement == "stromzaehler")
-            |> filter(fn: (r) => r._field == "import_active")
-            |> aggregateWindow(every: 1mo, fn: max, createEmpty: false, location: location)
-            |> difference(nonNegative: true)
-            |> filter(fn: (r) => r._time >= startJahr)
-    `;
-
-    const werteProMonat: Record<number, number> = {};
-
-    for await (const { values, tableMeta } of queryApi.iterateRows(flux)) {
-        const o = tableMeta.toObject(values);
-        if (o._value !== null && o._value !== undefined) {
-            // UTC-Monat verwenden, um Zeitzonen-Überläufe um 00:00 Uhr zu vermeiden
-            const monatIdx = new Date(o._time).getUTCMonth();
-            werteProMonat[monatIdx] = o._value;
-        }
-    }
-
-    // Aktuellen Monat (Oktober) live überschreiben
-    const aktuellerMonatWert = await getVerbrauchMonat();
-    if (aktuellerMonatWert !== null) {
-        werteProMonat[aktuellerMonatIdx] = aktuellerMonatWert;
-    }
-
-    return Array.from({ length: 12 }, (_, i) => {
-        if (i > aktuellerMonatIdx) return null; // Zukünftige Monate
-        return werteProMonat[i] ?? 0;
-    });
 }
 
 function fill24Hours(dataMap: Record<number, number>): DatenPunkt[] {
