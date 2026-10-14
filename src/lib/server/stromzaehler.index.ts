@@ -11,6 +11,6 @@ export const getVerbrauchHeute = impl.getVerbrauchHeute;
 export const getVerbrauchProTagMonat = impl.getVerbrauchProTagMonat;
 export const getVerbrauchVormonat = impl.getVerbrauchVormonat;
 export const getVerbrauchMonat = impl.getVerbrauchMonat;
-export const getVerbrauchProMonatJahr = real.getVerbrauchProMonatJahr;
+export const getVerbrauchProMonatJahr = impl.getVerbrauchProMonatJahr;
 export const getVerbrauchLetzte7Tage = impl.getVerbrauchLetzte7Tage;
 export const getAktuelleLeistung = impl.getAktuelleLeistung;

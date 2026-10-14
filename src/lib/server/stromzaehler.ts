@@ -236,9 +236,69 @@ export async function getAktuelleLeistung(): Promise<number | null> {
 
 function fill24Hours(dataMap: Record<number, number>): DatenPunkt[] {
     const heute = new Date();
-    
+
     return Array.from({ length: 24 }, (_, hour) => ({
         time: new Date(heute.setHours(hour, 0, 0, 0)).toISOString(),
         value: dataMap[hour] ?? null // 0 statt null verhindert den Tooltip-Crash
     }));
+}
+
+export async function getVerbrauchProMonatJahr(
+    jahr: number = new Date().getFullYear()
+): Promise<(number | null)[]> {
+    // Januar/Dezember = CET (+01:00), daher sind die Jahresgrenzen als Literal eindeutig
+    const flux = `
+        import "date"
+        import "timezone"
+
+        option location = timezone.location(name: "Europe/Berlin")
+
+        startJahr = time(v: "${jahr}-01-01T00:00:00+01:00")
+        endeJahr = time(v: "${jahr + 1}-01-01T00:00:00+01:00")
+
+        from(bucket: "stromzaehler_1d")
+            |> range(start: date.add(d: -1d, to: startJahr), stop: endeJahr)
+            |> filter(fn: (r) => r._measurement == "stromzaehler")
+            |> filter(fn: (r) => r._field == "import_active")
+            |> aggregateWindow(every: 1d, fn: max, createEmpty: false, location: location)
+            |> difference(nonNegative: true)
+            |> filter(fn: (r) => r._time >= startJahr)
+            |> aggregateWindow(every: 1mo, fn: sum, createEmpty: false, timeSrc: "_start", location: location)
+    `;
+
+    const monatsFormat = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Europe/Berlin',
+        month: 'numeric'
+    });
+
+    const werteProMonat: Record<number, number> = {};
+
+    try {
+        for await (const { values, tableMeta } of queryApi.iterateRows(flux)) {
+            const o = tableMeta.toObject(values);
+            if (o._value !== null && o._value !== undefined) {
+                const monat = parseInt(monatsFormat.format(new Date(o._time)), 10); // 1–12
+                werteProMonat[monat] = o._value;
+            }
+        }
+    } catch (err) {
+        console.error('❌ Fehler bei getVerbrauchProMonatJahr():', err);
+    }
+
+    const now = new Date();
+    const aktuellesJahr = now.getFullYear();
+    const aktuellerMonat = now.getMonth() + 1;
+
+    // Laufenden Monat: gestern und früher stehen im 1d-Bucket, heute kommt live dazu
+    if (jahr === aktuellesJahr) {
+        const heute = (await getVerbrauchHeute()) ?? 0;
+        werteProMonat[aktuellerMonat] = (werteProMonat[aktuellerMonat] ?? 0) + heute;
+    }
+
+    return Array.from({ length: 12 }, (_, i) => {
+        const monat = i + 1;
+        if (jahr > aktuellesJahr) return null;
+        if (jahr === aktuellesJahr && monat > aktuellerMonat) return null;
+        return werteProMonat[monat] ?? 0;
+    });
 }
