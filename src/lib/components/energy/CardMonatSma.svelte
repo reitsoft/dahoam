@@ -120,22 +120,22 @@
 		plugins: {
 			legend: { display: false },
 			tooltip: {
-				enabled: true,
-				mode: 'index',
-				intersect: false,
-				displayColors: true,
-				boxWidth: 8,
-				boxHeight: 8,
-				filter: (item) => item.parsed.y !== null && item.parsed.y !== undefined,
-				callbacks: {
-					title: (items) => `Tag ${items[0].label}`,
-					label: (context) => `${context.dataset.label}: ${(context.parsed.y ?? 0).toFixed(1)} kWh`,
-					footer: (items) =>
-						hatPv
-							? `Gesamt: ${items.reduce((s, i) => s + (i.parsed.y ?? 0), 0).toFixed(1)} kWh`
-							: ''
-				}
-			},
+    enabled: true,
+    mode: 'index',
+    intersect: false,
+    displayColors: true,
+    boxWidth: 8,
+    boxHeight: 8,
+    filter: (item) => item.parsed.y !== null && item.parsed.y !== undefined,
+    callbacks: {
+        title: (items) => (items.length ? `Tag ${items[0].label}` : ''),
+        label: (context) => `${context.dataset.label}: ${(context.parsed.y ?? 0).toFixed(1)} kWh`,
+        footer: (items) =>
+            hatPv && items.length
+                ? `Gesamt: ${items.reduce((s, i) => s + (i.parsed.y ?? 0), 0).toFixed(1)} kWh`
+                : ''
+    }
+},
 			annotation: {
 				annotations: {
 					maxLine: {
