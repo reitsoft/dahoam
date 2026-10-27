@@ -29,6 +29,14 @@ export const shutterStates = new Map<string, { pos: number; state: string }>();
 
 export const sensorStates = new Map<string, SensorState>();
 
+// Status-Speicher für die Klingel / Shelly Pro 3 (Klingel-Tuer)
+export const doorbellState = {
+	input0: false,
+	switch0Enabled: true, // Entspricht dem Web-UI-Schalter (ob Klingel aktiv/deaktiviert ist)
+	output0: false,
+	output1: false // E-Türöffner
+};
+
 function loadSensorCache(): Record<string, SensorState> {
 	if (!existsSync(SENSOR_CACHE_PATH)) return {};
 	try {
@@ -77,6 +85,7 @@ if (!globalThis.__mqttClient) {
 
 		mqttClient.subscribe('+/status/cover:0');
 		mqttClient.subscribe('+/events/rpc'); // Shelly H&T Gen3 Notify-Nachrichten (Keller-Sensor)
+		mqttClient.subscribe('Klingel-Tuer/events'); // Shelly Pro 3 Klingel Events
 		mqttClient.subscribe(`${CLIENT_ID}/rpc`); // Antworten auf Status-Abfragen UND auf Commands laufen hier auf
 
 		// Beim Verbindungsaufbau aktiv den aktuellen Stand jedes Rolladens abfragen,
@@ -87,8 +96,6 @@ if (!globalThis.__mqttClient) {
 				JSON.stringify({ id: 1, src: CLIENT_ID, method: 'Cover.GetStatus', params: { id: 0 } })
 			);
 		}
-		// Kein Polling für SENSOR_LIST: Der H&T Gen3 ist battery-powered/sleepy
-		// und meldet sich nur selbstständig alle wakeup_period Sekunden (hier 7200s = 2h).
 	});
 
 	// Ohne diesen Handler wirft Node bei einem MQTT-Fehler (z. B. falsche
@@ -107,10 +114,50 @@ if (!globalThis.__mqttClient) {
 		const parts = topic.split('/');
 		const mqttId = parts[0];
 
-		// Antworten auf unsere Cover.GetStatus-Abfrage und auf Commands (siehe
-		// src/routes/api/shutter/command/+server.ts, dort muss dieselbe CLIENT_ID
-		// als "src" verwendet werden!) kommen auf <CLIENT_ID>/rpc zurück; das
-		// Gerät wird über das "src"-Feld im Payload identifiziert, nicht über das Topic.
+		// --- Klingel-Logik (Shelly Pro 3: Klingel-Tuer/events) ---
+		if (topic === 'Klingel-Tuer/events') {
+			try {
+				const data = JSON.parse(payload);
+				const params = data.params;
+
+				if (params) {
+					// Prüfen, ob input:0 gemeldet wurde (Klingeltaster gedrückt)
+					if (params['input:0'] !== undefined) {
+						doorbellState.input0 = params['input:0'].state === true;
+
+						// Bedingung: Wenn Input 0 = 1 (true) UND Klingel aktiv/eingeschaltet (switch0Enabled === true, bzw. negiert 'deaktiviert = 0')
+						if (doorbellState.input0 && doorbellState.switch0Enabled) {
+							console.log('🔔 Klingel betätigt! Schalte Output 0 ein...');
+							
+							// MQTT-Befehl senden, um output:0 (Switch 0) einzuschalten (RPC-Methode Switch.Set)
+							mqttClient.publish(
+								'Klingel-Tuer/rpc',
+								JSON.stringify({
+									id: 1,
+									src: CLIENT_ID,
+									method: 'Switch.Set',
+									params: { id: 0, on: true }
+								})
+							);
+						}
+					}
+
+					// Optional: Status von switch:0, switch:1, switch:2 mitlesen
+					for (let i = 0; i <= 2; i++) {
+						if (params[`switch:${i}`] !== undefined) {
+							const outputState = params[`switch:${i}`].output;
+							if (i === 0) doorbellState.output0 = outputState;
+							if (i === 1) doorbellState.output1 = outputState; // E-Türöffner
+						}
+					}
+				}
+			} catch {
+				// ungültiges JSON ignorieren
+			}
+			return;
+		}
+
+		// Antworten auf unsere Cover.GetStatus-Abfrage und auf Commands kommen auf <CLIENT_ID>/rpc zurück
 		if (topic === `${CLIENT_ID}/rpc`) {
 			try {
 				const data = JSON.parse(payload);
@@ -130,9 +177,6 @@ if (!globalThis.__mqttClient) {
 		}
 
 		// Sensor-Notifies vom Shelly H&T Gen3 (Topic: <mqttId>/events/rpc).
-		// Der Sensor sendet beim Aufwachen zuerst "NotifyFullStatus" mit allen
-		// Werten auf einmal, danach mehrere "NotifyStatus" mit jeweils nur einem
-		// geänderten Feld — deshalb hier mergen statt überschreiben.
 		if (parts[1] === 'events' && parts[2] === 'rpc') {
 			const matchedSensor = SENSOR_LIST.find((s) => s.mqttId === mqttId);
 			if (!matchedSensor) return;
@@ -153,7 +197,7 @@ if (!globalThis.__mqttClient) {
 				if (p['temperature:0']?.tC !== undefined) current.temperature = p['temperature:0'].tC;
 				if (p['humidity:0']?.rh !== undefined) current.humidity = p['humidity:0'].rh;
 				if (p['devicepower:0']?.battery?.percent !== undefined) {
-					current.batteryPercent = p['devicepower:0'].battery.percent;
+					current.batteryPercent = p['devicepower:0'].devicepower?.battery?.percent ?? p['devicepower:0'].battery.percent;
 				}
 				current.lastUpdated = Date.now();
 
@@ -188,8 +232,21 @@ if (!globalThis.__mqttClient) {
 		});
 	});
 
-	// Sauberes Beenden beim Stoppen des Dev-Servers / Prozess-Neustart,
-	// damit der MQTT-Socket nicht offen bleibt und den Event-Loop blockiert
+	// Hilfsfunktion, um den elektrischen Türöffner (Output 1) per Software zu triggern
+	// (Kann in deinen API-Endpunkten aufgerufen werden)
+	// export function triggerDoorOpener() {
+	// 	mqttClient.publish(
+	// 		'Klingel-Tuer/rpc',
+	// 		JSON.stringify({
+	// 			id: 2,
+	// 			src: CLIENT_ID,
+	// 			method: 'Switch.Set',
+	// 			params: { id: 1, on: true } // Schaltet Output 1 (E-Türöffner)
+	// 		})
+	// 	);
+	// }
+
+	// Sauberes Beenden beim Stoppen des Dev-Servers / Prozess-Neustart
 	const shutdown = () => {
 		mqttClient.end(true, {}, () => process.exit(0));
 	};
