@@ -1,6 +1,7 @@
 // routes/+page.server.ts
 import { env } from '$env/dynamic/private';
 import { getVerbrauchHeute, getVerbrauchMonat } from '$lib/server/stromzaehler.index';
+import { doorbellState } from '$lib/server/mqtt';
 
 const formatEuro = (n: number) => {
     if (isNaN(n) || n === null || n === undefined) return '0,00';
@@ -8,7 +9,7 @@ const formatEuro = (n: number) => {
 };
 
 export const load = async () => {
-    // Fallback auf 0.30 €/kWh, falls die Umgebungsvariable nicht gesetzt oder ungültig ist
+    // Fallback auf 0.30 €/kWh, falls die Umgebungsvariable nicht gesetzt ist
     const rawPreis = env.PREIS_PRO_KWH ? parseFloat(env.PREIS_PRO_KWH.replace(',', '.')) : 0.30;
     const preisProKwh = isNaN(rawPreis) ? 0.30 : rawPreis;
 
@@ -26,6 +27,10 @@ export const load = async () => {
             kostenHeute: formatEuro(heuteVal * preisProKwh),
             kwhMonat: Math.round(monatVal),
             kostenMonat: formatEuro(monatVal * preisProKwh)
+        },
+        // Aktueller Zustand der Haustür / Klingel für die Card
+        haustuer: {
+            klingelAktiv: doorbellState.switch0Enabled
         }
     };
 };
