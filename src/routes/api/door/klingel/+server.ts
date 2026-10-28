@@ -28,7 +28,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
         // Wenn die Klingel DEAKTIVIERT wurde, starte den 8-Stunden-Timer
         if (!aktiv) {
-            console.log('🔇 Klingel stummgeschaltet. Starte 8-unden-Timer...');
+            console.log('🔇 Klingel stummgeschaltet. Starte 8-Stunden-Timer...');
             
             resetTimer = setTimeout(() => {
                 doorbellState.switch0Enabled = true;
