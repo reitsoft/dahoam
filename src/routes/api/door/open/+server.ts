@@ -16,9 +16,22 @@ export const POST: RequestHandler = async () => {
             })
         );
 
+        // 2. Nach 3 Sekunden sauber per MQTT wieder ausschalten
+        setTimeout(() => {
+            mqttClient.publish(
+                'Klingel-Tuer/rpc',
+                JSON.stringify({
+                    id: 3,
+                    src: CLIENT_ID,
+                    method: 'Switch.Set',
+                    params: { id: 1, on: false }
+                })
+            );
+        }, 3000);
+
         return json({ success: true, message: 'Türöffner ausgelöst' });
     } catch (err) {
-        console.error('❌ Fehler beim Anuern des Türöffners:', err);
+        console.error('❌ Fehler beim Ansteuern des Türöffners:', err);
         return json({ success: false, error: 'Fehler beim Senden des MQTT-Befehls' }, { status: 500 });
     }
 };
