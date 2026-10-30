@@ -1,37 +1,34 @@
 // src/routes/api/door/open/+server.ts
-import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
-import { mqttClient, CLIENT_ID } from '$lib/server/mqtt';
+import { json, error } from '@sveltejs/kit';
+import { verifyAuthenticationResponse } from '@simplewebauthn/server';
+import {
+    rpID, origin, loadCredentials, toCredential, updateCounter, consumeChallenge
+} from '$lib/server/webauthn';
 
-export const POST: RequestHandler = async () => {
+export const POST = async ({ request }) => {
+    const assertion = await request.json().catch(() => null);
+    if (!assertion?.id) throw error(400, 'Ungültige Anfrage');
+
+    const stored = (await loadCredentials()).find((c) => c.id === assertion.id);
+    if (!stored) throw error(401, 'Unbekannter Passkey');
+
     try {
-        // 1. E-Türöffner (Switch 1) einschalten
-        mqttClient.publish(
-            'Klingel-Tuer/rpc',
-            JSON.stringify({
-                id: 2,
-                src: CLIENT_ID,
-                method: 'Switch.Set',
-                params: { id: 1, on: true }
-            })
-        );
-
-        // 2. Nach 3 Sekunden sauber per MQTT wieder ausschalten
-        setTimeout(() => {
-            mqttClient.publish(
-                'Klingel-Tuer/rpc',
-                JSON.stringify({
-                    id: 3,
-                    src: CLIENT_ID,
-                    method: 'Switch.Set',
-                    params: { id: 1, on: false }
-                })
-            );
-        }, 3000);
-
-        return json({ success: true, message: 'Türöffner ausgelöst' });
-    } catch (err) {
-        console.error('❌ Fehler beim Ansteuern des Türöffners:', err);
-        return json({ success: false, error: 'Fehler beim Senden des MQTT-Befehls' }, { status: 500 });
+        const v = await verifyAuthenticationResponse({
+            response: assertion,
+            expectedChallenge: consumeChallenge,
+            expectedOrigin: origin,
+            expectedRPID: rpID,
+            credential: toCredential(stored),
+            requireUserVerification: true
+        });
+        if (!v.verified) throw new Error('nicht verifiziert');
+        await updateCounter(stored.id, v.authenticationInfo.newCounter);
+    } catch (e) {
+        console.warn('Türöffnung abgelehnt:', e);
+        throw error(401, 'Verifikation fehlgeschlagen');
     }
+
+    // ---- ab hier dein bestehender Code: MQTT-Publish für den Türöffner ----
+
+    return json({ success: true });
 };
