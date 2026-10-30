@@ -14,6 +14,7 @@
 	const TUER_TRACK_PADDING = 6;
 
 	let tuerEntriegelt = $state(false);
+	let tuerFehler = $state('');
 	let tuerTrackBreite = $state(0);
 	let tuerDragX = $state(0);
 	let tuerDragging = $state(false);
@@ -61,18 +62,35 @@
 	}
 
 	async function entriegeln(): Promise<boolean> {
+		tuerFehler = '';
 		try {
 			const ch = await fetch('/api/door/challenge', { method: 'POST' });
-			if (!ch.ok) return false;
-			const assertion = await startAuthentication({ optionsJSON: await ch.json() });
+			if (!ch.ok) {
+				tuerFehler = `Challenge: HTTP ${ch.status}`;
+				return false;
+			}
+
+			let assertion;
+			try {
+				assertion = await startAuthentication({ optionsJSON: await ch.json() });
+			} catch (e) {
+				tuerFehler = `Passkey: ${(e as Error).name} – ${(e as Error).message}`;
+				return false;
+			}
+
 			const res = await fetch('/api/door/open', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(assertion)
 			});
-			return res.ok;
-		} catch {
-			return false; // Scan abgebrochen oder Netzwerkfehler
+			if (!res.ok) {
+				tuerFehler = `Öffnen: HTTP ${res.status}`;
+				return false;
+			}
+			return true;
+		} catch (e) {
+			tuerFehler = `Netzwerk: ${(e as Error).message}`;
+			return false;
 		}
 	}
 
@@ -168,4 +186,7 @@
 			{/if}
 		</button>
 	</div>
+    {#if tuerFehler}
+    <p class="px-2 text-xs text-orange-400">{tuerFehler}</p>
+{/if}
 </div>
