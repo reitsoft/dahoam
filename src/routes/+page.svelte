@@ -22,6 +22,9 @@
         <CardBad />
         <CardKeller />
         <!-- Übergabe des Haustür-Status an die Komponente -->
-        <CardHaustuer klingelAktivInitial={data.haustuer.klingelAktiv} />
+        <CardHaustuer
+    klingelAktivInitial={data.haustuer.klingelAktiv}
+    mutedUntilInitial={data.haustuer.mutedUntil}
+/>
     </div>
 </Viewport>

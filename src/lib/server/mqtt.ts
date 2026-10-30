@@ -1,7 +1,7 @@
 // src/lib/server/mqtt.ts
 import { env } from '$env/dynamic/private';
 import { EventEmitter } from 'node:events';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import mqtt from 'mqtt';
 import { SHUTTER_LIST } from '$lib/config/shutters';
@@ -32,10 +32,79 @@ export const sensorStates = new Map<string, SensorState>();
 // Status-Speicher für die Klingel / Shelly Pro 3 (Klingel-Tuer)
 export const doorbellState = {
 	input0: false,
-	switch0Enabled: true, // Entspricht dem Web-UI-Schalter (ob Klingel aktiv/deaktiviert ist)
+	switch0Enabled: true, // Klingel aktiv (true) oder stummgeschaltet (false)
+	mutedUntil: null as number | null, // Unix-ms, nur gesetzt solange stumm
 	output0: false,
 	output1: false // E-Türöffner
 };
+
+// --- Klingel stummschalten (mit Auto-Reaktivierung und Persistenz) ---
+const DATA_DIR = env.DATA_DIR ?? join(process.cwd(), 'data');
+const KLINGEL_STATE_PATH = join(DATA_DIR, 'klingel.json');
+export const KLINGEL_STUMM_DAUER_MS = 8 * 60 * 60 * 1000; // 8 Stunden
+
+let klingelTimer: ReturnType<typeof setTimeout> | null = null;
+
+function persistKlingel() {
+	try {
+		mkdirSync(DATA_DIR, { recursive: true });
+		writeFileSync(KLINGEL_STATE_PATH, JSON.stringify({ mutedUntil: doorbellState.mutedUntil }));
+	} catch (err) {
+		console.error('⚠️ Klingel-Zustand konnte nicht gespeichert werden:', err);
+	}
+}
+
+function planKlingelReset() {
+	if (klingelTimer) {
+		clearTimeout(klingelTimer);
+		klingelTimer = null;
+	}
+	if (doorbellState.mutedUntil === null) return;
+	const rest = Math.max(doorbellState.mutedUntil - Date.now(), 0);
+	klingelTimer = setTimeout(() => isKlingelAktiv(), rest + 100);
+}
+
+/** Schaltet die Klingel an oder für 8 Stunden stumm. */
+export function setKlingelAktiv(aktiv: boolean) {
+	doorbellState.switch0Enabled = aktiv;
+	doorbellState.mutedUntil = aktiv ? null : Date.now() + KLINGEL_STUMM_DAUER_MS;
+	persistKlingel();
+	planKlingelReset();
+	console.log(aktiv ? '🔔 Klingel aktiv.' : '🔇 Klingel stumm für 8 Stunden.');
+	mqttEvents.emit('klingel', {
+		klingelAktiv: doorbellState.switch0Enabled,
+		mutedUntil: doorbellState.mutedUntil
+	});
+}
+
+/** Liefert den Klingel-Zustand und hebt eine abgelaufene Stummschaltung auf. */
+export function isKlingelAktiv(): boolean {
+	if (
+		!doorbellState.switch0Enabled &&
+		doorbellState.mutedUntil !== null &&
+		Date.now() >= doorbellState.mutedUntil
+	) {
+		console.log('⏰ Stummschaltung abgelaufen.');
+		setKlingelAktiv(true);
+	}
+	return doorbellState.switch0Enabled;
+}
+
+function loadKlingelState() {
+	try {
+		if (!existsSync(KLINGEL_STATE_PATH)) return;
+		const { mutedUntil } = JSON.parse(readFileSync(KLINGEL_STATE_PATH, 'utf-8'));
+		if (typeof mutedUntil === 'number' && mutedUntil > Date.now()) {
+			doorbellState.switch0Enabled = false;
+			doorbellState.mutedUntil = mutedUntil;
+			planKlingelReset();
+			console.log('🔇 Klingel-Stummschaltung nach Neustart wiederhergestellt.');
+		}
+	} catch {
+		// defekte Datei ignorieren, Klingel bleibt aktiv
+	}
+}
+loadKlingelState();
 
 function loadSensorCache(): Record<string, SensorState> {
 	if (!existsSync(SENSOR_CACHE_PATH)) return {};
@@ -125,10 +194,11 @@ if (!globalThis.__mqttClient) {
 					if (params['input:0'] !== undefined) {
 						doorbellState.input0 = params['input:0'].state === true;
 
-						// Bedingung: Wenn Input 0 = 1 (true) UND Klingel aktiv/eingeschaltet (switch0Enabled === true, bzw. negiert 'deaktiviert = 0')
-						if (doorbellState.input0 && doorbellState.switch0Enabled) {
+						// Bedingung: Input 0 = 1 (Taster gedrückt) UND Klingel aktiv.
+						// isKlingelAktiv() hebt eine abgelaufene Stummschaltung automatisch auf.
+						if (doorbellState.input0 && isKlingelAktiv()) {
 							console.log('🔔 Klingel betätigt! Schalte Output 0 ein...');
-							
+
 							// MQTT-Befehl senden, um output:0 (Switch 0) einzuschalten (RPC-Methode Switch.Set)
 							mqttClient.publish(
 								'Klingel-Tuer/rpc',
@@ -232,8 +302,7 @@ if (!globalThis.__mqttClient) {
 		});
 	});
 
-
-		// Sauberes Beenden beim Stoppen des Dev-Servers / Prozess-Neustart
+	// Sauberes Beenden beim Stoppen des Dev-Servers / Prozess-Neustart
 	const shutdown = () => {
 		mqttClient.end(true, {}, () => process.exit(0));
 	};
@@ -241,6 +310,7 @@ if (!globalThis.__mqttClient) {
 	process.on('SIGTERM', shutdown);
 }
 
+// --- Türöffner (Shelly Pro 3, Output 1) ---
 const TUER_OEFFNUNGSZEIT_S = 3;
 let letzteTuerOeffnung = 0;
 
