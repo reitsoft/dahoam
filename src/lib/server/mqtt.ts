@@ -232,24 +232,53 @@ if (!globalThis.__mqttClient) {
 		});
 	});
 
-	// Hilfsfunktion, um den elektrischen Türöffner (Output 1) per Software zu triggern
-	// (Kann in deinen API-Endpunkten aufgerufen werden)
-	// export function triggerDoorOpener() {
-	// 	mqttClient.publish(
-	// 		'Klingel-Tuer/rpc',
-	// 		JSON.stringify({
-	// 			id: 2,
-	// 			src: CLIENT_ID,
-	// 			method: 'Switch.Set',
-	// 			params: { id: 1, on: true } // Schaltet Output 1 (E-Türöffner)
-	// 		})
-	// 	);
-	// }
 
-	// Sauberes Beenden beim Stoppen des Dev-Servers / Prozess-Neustart
+		// Sauberes Beenden beim Stoppen des Dev-Servers / Prozess-Neustart
 	const shutdown = () => {
 		mqttClient.end(true, {}, () => process.exit(0));
 	};
 	process.on('SIGINT', shutdown);
 	process.on('SIGTERM', shutdown);
+}
+
+const TUER_OEFFNUNGSZEIT_S = 3;
+let letzteTuerOeffnung = 0;
+
+/**
+ * Schaltet Output 1 (E-Türöffner) am Shelly Pro 3 für 3 Sekunden ein.
+ * Das Zurückschalten übernimmt der Shelly selbst (toggle_after).
+ */
+export function triggerDoorOpener(): Promise<void> {
+	return new Promise((resolve, reject) => {
+		if (!mqttClient.connected) {
+			reject(new Error('MQTT nicht verbunden'));
+			return;
+		}
+
+		// Erneutes Auslösen während der Öffnungszeit ignorieren (Timer nicht verlängern)
+		const jetzt = Date.now();
+		if (jetzt - letzteTuerOeffnung < TUER_OEFFNUNGSZEIT_S * 1000) {
+			resolve();
+			return;
+		}
+
+		mqttClient.publish(
+			'Klingel-Tuer/rpc',
+			JSON.stringify({
+				id: 2,
+				src: CLIENT_ID,
+				method: 'Switch.Set',
+				params: { id: 1, on: true, toggle_after: TUER_OEFFNUNGSZEIT_S }
+			}),
+			{ qos: 1 },
+			(err) => {
+				if (err) {
+					reject(err);
+				} else {
+					letzteTuerOeffnung = jetzt;
+					resolve();
+				}
+			}
+		);
+	});
 }
