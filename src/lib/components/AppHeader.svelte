@@ -55,18 +55,17 @@
 		</h1>
 	</div>
 
-	<!-- MQTT-Status: grün = verbunden, orange = getrennt -->
-	<span
-		role="img"
-		aria-label={statusText}
-		title={statusText}
-		class="block h-7 w-7 shrink-0 transition-colors duration-300 {mqttVerbunden === null
-			? 'text-cream-100/30'
-			: mqttVerbunden
-				? 'text-green-500'
-				: 'text-orange-500'}"
-		style="background-color: currentColor;
-			-webkit-mask: url('/mqtt-icon-transparent.svg') center / contain no-repeat;
-			mask: url('/mqtt-icon-transparent.svg') center / contain no-repeat;"
-	></span>
+<span
+	role="img"
+	aria-label={statusText}
+	title={statusText}
+	class="block h-6 w-6 shrink-0 rounded-lg transition-colors duration-300 {mqttVerbunden === null
+		? 'text-cream-100/30'
+		: mqttVerbunden
+			? 'text-teal-500'
+			: 'text-orange-500'}"
+	style="background-color: currentColor;
+		-webkit-mask: url('/mqtt-icon-transparent.svg') center / contain no-repeat;
+		mask: url('/mqtt-icon-transparent.svg') center / contain no-repeat;"
+></span>
 </header>
