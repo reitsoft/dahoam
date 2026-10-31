@@ -3,7 +3,7 @@ import { env } from '$env/dynamic/private';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { timingSafeEqual } from 'node:crypto';
-import type { AuthenticatorTransportFuture, WebAuthnCredential } from '@simplewebauthn/server';
+import type { AuthenticatorTransport, WebAuthnCredential } from '@simplewebauthn/server';
 import { isoBase64URL } from '@simplewebauthn/server/helpers';
 
 export const rpID = env.WEBAUTHN_RP_ID;
@@ -14,7 +14,7 @@ type Stored = {
     id: string;
     publicKey: string; // base64url
     counter: number;
-    transports?: AuthenticatorTransportFuture[];
+    transports?: AuthenticatorTransport[];
     name: string;
     created: number;
 };
@@ -40,7 +40,7 @@ export async function addCredential(c: WebAuthnCredential, name: string) {
         id: c.id,
         publicKey: isoBase64URL.fromBuffer(c.publicKey),
         counter: c.counter,
-        transports: c.transports,
+        transports: c.transports as AuthenticatorTransport[] | undefined,
         name,
         created: Date.now()
     });

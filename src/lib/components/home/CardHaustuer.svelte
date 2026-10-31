@@ -191,7 +191,7 @@
 		>
 			{#if klingelAktiv}
 				<Bell class="h-3.5 w-3.5" />
-				<span class="text-[10px] font-semibold tracking-wider uppercase">Klingel an</span>
+				<span class="text-[10px] font-semibold tracking-wider uppercase">Klingel ist an</span>
 			{:else}
 				<BellOff class="h-3.5 w-3.5" />
 				<span class="text-[10px] font-semibold tracking-wider uppercase"
