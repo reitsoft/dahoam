@@ -184,42 +184,41 @@ if (!globalThis.__mqttClient) {
 		const mqttId = parts[0];
 
 		// --- Klingel-Logik (Shelly Pro 3: Klingel-Tuer/events) ---
-		if (topic === 'Klingel-Tuer/events') {
-			console.log('Klingel-Event:', payload);   // temporär
+				// --- Klingel-Logik (Shelly Pro 3: Klingel-Tuer/events/rpc) ---
+		if (topic === 'Klingel-Tuer/events/rpc') {
 			try {
 				const data = JSON.parse(payload);
+				if (data.method !== 'NotifyStatus' && data.method !== 'NotifyFullStatus') return;
 				const params = data.params;
+				if (!params) return;
 
-				if (params) {
-					// Prüfen, ob input:0 gemeldet wurde (Klingeltaster gedrückt)
-					if (params['input:0'] !== undefined) {
-						doorbellState.input0 = params['input:0'].state === true;
+				// Klingeltaster an S1 (input:0) gedrückt?
+				const input = params['input:0'];
+				if (input && typeof input.state === 'boolean') {
+					doorbellState.input0 = input.state;
 
-						// Bedingung: Input 0 = 1 (Taster gedrückt) UND Klingel aktiv.
-						// isKlingelAktiv() hebt eine abgelaufene Stummschaltung automatisch auf.
-						if (doorbellState.input0 && isKlingelAktiv()) {
-							console.log('🔔 Klingel betätigt! Schalte Output 0 ein...');
-
-							// MQTT-Befehl senden, um output:0 (Switch 0) einzuschalten (RPC-Methode Switch.Set)
-							mqttClient.publish(
-								'Klingel-Tuer/rpc',
-								JSON.stringify({
-									id: 1,
-									src: CLIENT_ID,
-									method: 'Switch.Set',
-									params: { id: 0, on: true }
-								})
-							);
-						}
+					if (input.state && isKlingelAktiv()) {
+						console.log('🔔 Klingel betätigt! Schalte Output 0 ein...');
+						mqttClient.publish(
+							'Klingel-Tuer/rpc',
+							JSON.stringify({
+								id: 1,
+								src: CLIENT_ID,
+								method: 'Switch.Set',
+								params: { id: 0, on: true, toggle_after: 2 }
+							})
+						);
+					} else if (input.state) {
+						console.log('🔇 Klingel gedrückt, aber stummgeschaltet.');
 					}
+				}
 
-					// Optional: Status von switch:0, switch:1, switch:2 mitlesen
-					for (let i = 0; i <= 2; i++) {
-						if (params[`switch:${i}`] !== undefined) {
-							const outputState = params[`switch:${i}`].output;
-							if (i === 0) doorbellState.output0 = outputState;
-							if (i === 1) doorbellState.output1 = outputState; // E-Türöffner
-						}
+				// Ausgangszustände mitlesen (nur wenn die Nachricht "output" enthält)
+				for (let i = 0; i <= 1; i++) {
+					const out = params[`switch:${i}`]?.output;
+					if (typeof out === 'boolean') {
+						if (i === 0) doorbellState.output0 = out;
+						if (i === 1) doorbellState.output1 = out; // E-Türöffner
 					}
 				}
 			} catch {
@@ -227,7 +226,7 @@ if (!globalThis.__mqttClient) {
 			}
 			return;
 		}
-
+		
 		// Antworten auf unsere Cover.GetStatus-Abfrage und auf Commands kommen auf <CLIENT_ID>/rpc zurück
 		if (topic === `${CLIENT_ID}/rpc`) {
 			try {
