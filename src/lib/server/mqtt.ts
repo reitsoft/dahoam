@@ -185,6 +185,7 @@ if (!globalThis.__mqttClient) {
 
 		// --- Klingel-Logik (Shelly Pro 3: Klingel-Tuer/events) ---
 		if (topic === 'Klingel-Tuer/events') {
+			console.log('Klingel-Event:', payload);   // temporär
 			try {
 				const data = JSON.parse(payload);
 				const params = data.params;
