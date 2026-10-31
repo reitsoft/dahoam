@@ -205,7 +205,7 @@ if (!globalThis.__mqttClient) {
 								id: 1,
 								src: CLIENT_ID,
 								method: 'Switch.Set',
-								params: { id: 0, on: true, toggle_after: 2 }
+								params: { id: 0, on: true, toggle_after: 0.5 }
 							})
 						);
 					} else if (input.state) {
@@ -226,7 +226,7 @@ if (!globalThis.__mqttClient) {
 			}
 			return;
 		}
-		
+
 		// Antworten auf unsere Cover.GetStatus-Abfrage und auf Commands kommen auf <CLIENT_ID>/rpc zurück
 		if (topic === `${CLIENT_ID}/rpc`) {
 			try {
