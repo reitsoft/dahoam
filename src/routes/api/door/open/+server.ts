@@ -20,7 +20,7 @@ export const POST = async ({ request }) => {
 			expectedOrigin: origin,
 			expectedRPID: rpID,
 			credential: toCredential(stored),
-			requireUserVerification: true
+			requireUserVerification: false   // vorher: true
 		});
 		if (!v.verified) throw new Error('nicht verifiziert');
 		await updateCounter(stored.id, v.authenticationInfo.newCounter);

@@ -10,7 +10,7 @@ export const POST = async () => {
     const options = await generateAuthenticationOptions({
         rpID,
         allowCredentials: creds.map((c) => ({ id: c.id, transports: c.transports })),
-        userVerification: 'required'
+        userVerification: 'preferred'   // vorher: 'required'
     });
     rememberChallenge(options.challenge);
     return json(options);
