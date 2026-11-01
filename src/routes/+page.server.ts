@@ -1,6 +1,7 @@
 // routes/+page.server.ts
 import { env } from '$env/dynamic/private';
 import { getVerbrauchHeute, getVerbrauchMonat } from '$lib/server/stromzaehler.index';
+import { getLuefterStatus } from '$lib/server/luefter';
 import { isKlingelAktiv, doorbellState } from '$lib/server/mqtt';
 
 const formatEuro = (n: number) => {
@@ -24,6 +25,9 @@ export const load = async () => {
 			kostenHeute: formatEuro(heuteVal * preisProKwh),
 			kwhMonat: Math.round(monatVal),
 			kostenMonat: formatEuro(monatVal * preisProKwh)
+		},
+		luefter: {
+			status: getLuefterStatus()
 		},
 		haustuer: {
 			klingelAktiv: isKlingelAktiv(),
