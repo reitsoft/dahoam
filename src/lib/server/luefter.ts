@@ -7,7 +7,7 @@ import { mqttClient, mqttEvents, sensorStates, CLIENT_ID } from '$lib/server/mqt
 export type Modus = 'AUTO' | 'TIMER' | 'AUS';
 
 // --- Konfiguration ---
-const LUEFTER_MQTT_ID = 'bad-luefter'; // TODO: MQTT-Präfix des Shelly, der den Lüfter schaltet
+const LUEFTER_MQTT_ID = 'bad-luefter'; // MQTT-Präfix des Shelly, der den Lüfter schaltet
 const LUEFTER_SWITCH_ID = 0; // Kanal am Shelly (switch:0)
 const SENSOR_ID = 'bad'; // ID in SENSOR_LIST (Shelly H&T Gen3)
 
