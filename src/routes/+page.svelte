@@ -19,7 +19,7 @@
     <div class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-3 no-scrollbar">
         <CardVerbrauch strom={data.strom} />
         <CardHaus />
-        <CardBad initial={data.luefter} />
+        <CardBad initial={data.luefter.status} />
         <CardKeller />
         <!-- Übergabe des Haustür-Status an die Komponente -->
         <CardHaustuer

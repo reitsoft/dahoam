@@ -7,6 +7,7 @@
 	import Thermometer from '@lucide/svelte/icons/thermometer';
 	import BatteryFull from '@lucide/svelte/icons/battery-full';
 	import BatteryLow from '@lucide/svelte/icons/battery-low';
+	import { sensorStore } from '$lib/stores/sensors.sse.svelte';
 
 	type Modus = 'AUTO' | 'TIMER' | 'AUS';
 
@@ -14,16 +15,13 @@
 		modus: Modus;
 		laeuft: boolean;
 		timerEndsAt: number | null;
-		temperatur: number | null;
-		feuchtigkeit: number | null;
-		aktualisiert: number | null;
-		batterie: number | null;
 	};
 
 	let { initial }: { initial: LuefterStatus } = $props();
 
 	// Der Server ist die einzige Quelle der Wahrheit, die Card zeigt nur seinen Zustand
 	let status = $state<LuefterStatus>(untrack(() => initial));
+	let bad = $derived(sensorStore.get('bad'));
 	let busy = $state(false);
 	let fehler = $state('');
 	let jetzt = $state(Date.now());
@@ -33,7 +31,7 @@
 	);
 
 	// Batterie
-	let batteryLow = $derived(typeof status.batterie === 'number' && status.batterie < 15);
+	let batteryLow = $derived(bad?.batteryPercent != null && bad.batteryPercent < 15);
 
 	let showBatteryTooltip = $state(false);
 	let hideTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -131,7 +129,7 @@
 				/>
 			{/if}
 
-			{#if typeof status.batterie === 'number'}
+			{#if bad?.batteryPercent != null}
 				<div class="relative">
 					<button
 						type="button"
@@ -139,7 +137,7 @@
 						onmouseenter={showTooltip}
 						onmouseleave={hideTooltip}
 						class="flex items-center justify-center"
-						aria-label="Batteriestand {status.batterie}%"
+						aria-label="Batteriestand {bad.batteryPercent}%"
 					>
 						{#if batteryLow}
 							<BatteryLow class="h-5.5 w-8 stroke-2 text-orange-500" />
@@ -152,7 +150,7 @@
 						<div
 							class="absolute top-full right-0 z-10 mt-1.5 rounded-lg bg-navy-950 px-2 py-1 text-[11px] font-medium whitespace-nowrap text-cream-100 shadow-lg"
 						>
-							{status.batterie}%
+							{bad.batteryPercent}%
 						</div>
 					{/if}
 				</div>
@@ -167,7 +165,7 @@
 			</div>
 			<div>
 				<div class="text-2xl font-bold text-cream-100">
-					{typeof status.temperatur === 'number' ? `${status.temperatur.toFixed(1)}°` : '–'}
+					{bad?.temperature != null ? `${bad.temperature.toFixed(1)}°` : '–'}
 				</div>
 				<div class="text-xs text-cream-100/50">Temperatur</div>
 			</div>
@@ -178,7 +176,7 @@
 			</div>
 			<div>
 				<div class="text-2xl font-bold text-cream-100">
-					{typeof status.feuchtigkeit === 'number' ? `${Math.round(status.feuchtigkeit)}%` : '–'}
+					{bad?.humidity != null ? `${Math.round(bad.humidity)}%` : '–'}
 				</div>
 				<div class="text-xs text-cream-100/50">Feuchtigkeit</div>
 			</div>
