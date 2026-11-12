@@ -154,6 +154,24 @@ export const mqttClient =
 if (!globalThis.__mqttClient) {
 	globalThis.__mqttClient = mqttClient;
 
+	// eBUS: selten gesendete Werte regelmäßig aktiv abfragen
+	const EBUS_POLL = [
+		'ctlv3/Hc1FlowTemp',
+		'ctlv3/SystemFlowTemp',
+		'ctlv3/DisplayedOutsideTemp',
+		'ctlv3/WaterPressure',
+		'ctlv3/Z1RoomTemp',
+		'ctlv3/HwcStorageTemp',
+		'ctlv3/HwcTempDesired',
+		'ctlv3/HwcOpMode'
+	];
+	const pollEbus = () => {
+		if (!mqttClient.connected) return;
+		for (const p of EBUS_POLL) mqttClient.publish(`ebusd/${p}/get`, '');
+	};
+	setTimeout(pollEbus, 5000);
+	setInterval(pollEbus, 5 * 60 * 1000);
+
 	mqttClient.on('connect', () => {
 		console.log('✅ MQTT mit Broker verbunden');
 

@@ -18,6 +18,11 @@ function fehler(device: string): unknown[] {
 		.filter((x) => x !== null && x !== undefined);
 }
 
+function alter(pfad: string): number | null {
+	const e = ebusStates.get(pfad);
+	return e ? Math.round((Date.now() - e.zeit) / 1000) : null;
+}
+
 export function getEbusData() {
 	const status = val('hmu/RunDataStatuscode');
 	const drehzahl = val('hmu/RunDataCompressorSpeed');
@@ -32,7 +37,7 @@ export function getEbusData() {
 			verdichter_drehzahl_prozent: drehzahl,
 			vorlauf_c: val('hmu/Status01', 'temp'),
 			ruecklauf_c: val('hmu/Status01', 'temp_1'),
-			heizkreispumpe_an: an(val('hmu/Status01', 'pumpstate')),
+			interne_pumpe_an: an(val('hmu/Status01', 'pumpstate')),
 			betriebsart: val('hmu/SetMode', 'hcmode'),
 			vorlauf_soll_vom_regler_c: val('hmu/SetMode', 'flowtempdesired'),
 			leistungsaufnahme_kw: val('hmu/PowerConsumptionHmu'),
@@ -83,6 +88,15 @@ export function getEbusData() {
 		fehler: {
 			waermepumpe: fehler('hmu'),
 			regler: fehler('ctlv3')
+		},
+
+		datenalter_s: {
+			status: alter('hmu/RunDataStatuscode'),
+			vorlauf_ruecklauf: alter('hmu/Status01'),
+			leistung: alter('hmu/PowerConsumptionHmu'),
+			aussentemperatur: alter('ctlv3/DisplayedOutsideTemp'),
+			warmwasser_speicher: alter('ctlv3/HwcStorageTemp'),
+			raumtemperatur: alter('ctlv3/Z1RoomTemp')
 		}
 	};
 }
