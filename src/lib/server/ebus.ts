@@ -116,6 +116,7 @@ const num = (x: Wert): number | null => (typeof x === 'number' ? x : null);
 export function getHausKarte() {
 	const d = getEbusData();
 	return {
+		datenVorhanden: d.waermepumpe.status !== null,
 		raumTemp: num(d.raum.ist_c),
 		aussenTemp: num(d.umwelt.aussentemperatur_c),
 		warmwasserTemp: num(d.warmwasser.speichertemperatur_c),
