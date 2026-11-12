@@ -115,6 +115,12 @@ const num = (x: Wert): number | null => (typeof x === 'number' ? x : null);
 
 export function getHausKarte() {
 	const d = getEbusData();
+
+	const vorlauf = num(d.waermepumpe.vorlauf_c) ?? num(d.heizkreis.vorlauf_ist_c);
+	const ruecklauf = num(d.waermepumpe.ruecklauf_c);
+	const waermeKw = num(d.waermepumpe.waermeleistung_kw);
+	const stromKw = num(d.waermepumpe.leistungsaufnahme_kw);
+
 	return {
 		datenVorhanden: d.waermepumpe.status !== null,
 		raumTemp: num(d.raum.ist_c),
@@ -123,7 +129,22 @@ export function getHausKarte() {
 		pumpeAn:
 			d.heizkreis.pumpe_laut_regler_an === true || d.heizkreis.mischerkreis.pumpe_an === true,
 		kompressorAn: d.waermepumpe.verdichter_laeuft === true,
-		warmwasserAufbereitung: d.warmwasser.aufbereitung_aktiv === true
+		warmwasserAufbereitung: d.warmwasser.aufbereitung_aktiv === true,
+
+		// Details für das Popup
+		vorlaufTemp: vorlauf,
+		vorlaufSollTemp:
+			num(d.heizkreis.vorlauf_soll_c) ?? num(d.waermepumpe.vorlauf_soll_vom_regler_c),
+		ruecklaufTemp: ruecklauf,
+		spreizung: vorlauf !== null && ruecklauf !== null ? vorlauf - ruecklauf : null,
+		raumSollTemp: num(d.raum.soll_aktuell_c),
+		verdichterDrehzahl: num(d.waermepumpe.verdichter_drehzahl_prozent),
+		waermeleistungKw: waermeKw,
+		leistungsaufnahmeKw: stromKw,
+		// COP nur sinnvoll, solange der Verdichter wirklich Strom zieht
+		cop: waermeKw !== null && stromKw !== null && stromKw > 0.05 ? waermeKw / stromKw : null,
+		volumenstrom: num(d.waermepumpe.volumenstrom_heizkreis),
+		wasserdruck: num(d.umwelt.wasserdruck_bar)
 	};
 }
 

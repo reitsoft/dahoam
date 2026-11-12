@@ -1,4 +1,4 @@
-// src/routes/+page.server.ts
+// src/routes/energy/+page.server.ts
 import { 
     getAktuellerZaehlerstand, 
     getVerbrauchMonat, 

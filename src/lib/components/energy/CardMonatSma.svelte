@@ -1,3 +1,4 @@
+<!-- lib/components/energy/CardMonatSma.svelte-->
 <script lang="ts">
 	import RotateCcwClock from '@lucide/svelte/icons/rotate-ccw-clock';
 	import Calendar from '@lucide/svelte/icons/calendar';
