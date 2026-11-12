@@ -29,6 +29,11 @@ export const shutterStates = new Map<string, { pos: number; state: string }>();
 
 export const sensorStates = new Map<string, SensorState>();
 
+export const ebusStates = new Map<
+	string,
+	{ data: Record<string, { value: unknown } | undefined>; zeit: number }
+>();
+
 // Status-Speicher für die Klingel / Shelly Pro 3 (Klingel-Tuer)
 export const doorbellState = {
 	input0: false,
@@ -155,6 +160,7 @@ if (!globalThis.__mqttClient) {
 		mqttClient.subscribe('+/status/cover:0');
 		mqttClient.subscribe('+/events/rpc'); // Shelly H&T Gen3 Notify-Nachrichten (Keller-Sensor)
 		mqttClient.subscribe('Klingel-Tuer/events'); // Shelly Pro 3 Klingel Events
+		mqttClient.subscribe(['ebusd/hmu/+', 'ebusd/ctlv3/+', 'ebusd/vr_71/+']); // ebusd (Heizung)
 		mqttClient.subscribe(`${CLIENT_ID}/rpc`); // Antworten auf Status-Abfragen UND auf Commands laufen hier auf
 
 		// Beim Verbindungsaufbau aktiv den aktuellen Stand jedes Rolladens abfragen,
@@ -182,6 +188,17 @@ if (!globalThis.__mqttClient) {
 		const payload = message.toString();
 		const parts = topic.split('/');
 		const mqttId = parts[0];
+
+		// --- eBUS / Heizung (ebusd): ebusd/<gerät>/<nachricht> ---
+		if (parts[0] === 'ebusd') {
+			if (parts.length !== 3) return;
+			try {
+				ebusStates.set(`${parts[1]}/${parts[2]}`, { data: JSON.parse(payload), zeit: Date.now() });
+			} catch {
+				// kein JSON, ignorieren
+			}
+			return;
+		}
 
 		// --- Klingel-Logik (Shelly Pro 3: Klingel-Tuer/events) ---
 				// --- Klingel-Logik (Shelly Pro 3: Klingel-Tuer/events/rpc) ---

@@ -1,18 +1,20 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import House from '@lucide/svelte/icons/house';
 	import PanelsTopLeft from '@lucide/svelte/icons/panels-top-left';
 	import Zap from '@lucide/svelte/icons/zap';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import School from '@lucide/svelte/icons/school';
+	import Activity from '@lucide/svelte/icons/activity';
 
 	const items = [
 		{ href: resolve('/'), label: 'Haus', icon: House },
 		{ href: resolve('/shutters'), label: 'Rollos', icon: PanelsTopLeft },
 		{ href: resolve('/energy'), label: 'Energie', icon: Zap },
 		{ href: resolve('/weather'), label: 'Wetter', icon: SunIcon },
-		{ href: resolve('/school'), label: 'Schule', icon: School }
+		{ href: resolve('/school'), label: 'Schule', icon: School },
+		{ href: resolve('/ebus'), label: 'eBus', icon: Activity }
 	];
 </script>
 
@@ -23,8 +25,8 @@
 	{#each items as item (item.href)}
 		{@const active =
 			item.href === '/'
-				? $page.url.pathname === item.href
-				: $page.url.pathname.startsWith(item.href)}
+				? page.url.pathname === item.href
+				: page.url.pathname.startsWith(item.href)}
 
 		<a
 			href={item.href}
