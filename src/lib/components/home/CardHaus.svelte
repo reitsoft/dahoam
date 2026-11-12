@@ -25,6 +25,13 @@
 
 	const fmt = (n: number | null) => (n === null ? '–' : n.toFixed(1));
 
+	// Außentemperatur-Farbe: bis 12 °C Teal, ab 18 °C Orange, dazwischen Mischung
+	function aussenFarbe(t: number | null) {
+		if (t === null) return undefined;
+		const anteil = Math.min(Math.max((t - 12) / 6, 0), 1);
+		return `color-mix(in oklch, rgb(232 99 44) ${anteil * 100}%, rgb(27 143 161))`;
+	}
+
 	onMount(() => {
 		const laden = async () => {
 			try {
@@ -42,22 +49,27 @@
 
 <!-- Heizung / Warmwasser -->
 <div class="flex h-full flex-col justify-center gap-4 rounded-3xl border border-navy-800 bg-navy-900 p-3">
-	<div class="flex items-center">
+	<div class="relative flex items-center">
 		<span class="pl-2 text-xs font-bold tracking-wide text-cream-100/50 uppercase">Haus</span>
 
-		<!-- Heizkreispumpe: Text links, Icon rechts -->
+		<!-- Heizkreispumpe: mittig in der Titelzeile, Text links, Icon rechts -->
 		<span
-			class="ml-auto inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase {d.pumpeAn
+			class="absolute left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wide whitespace-nowrap uppercase {d.pumpeAn
 				? 'border-orange-500/30 text-orange-500'
 				: 'border-cream-100/15 text-cream-100/50'}"
 		>
 			Heizkreispumpe {d.pumpeAn ? 'an' : 'aus'}
-			<RefreshCw class="ml-1 h-4 w-4 stroke-3 {d.pumpeAn ? 'animate-pulse' : ''}" />
+			<RefreshCw class="h-3.5 w-3.5 stroke-3 {d.pumpeAn ? 'animate-pulse' : ''}" />
 		</span>
+
+		<!-- Außentemperatur: nur Zahl und Grad -->
+<span class="ml-auto pr-2 text-s font-bold text-cream-100/50" style:color={aussenFarbe(d.aussenTemp)}>
+	{fmt(d.aussenTemp)}°
+</span>
 	</div>
 
-	<div class="grid grid-cols-[1.25fr_1fr] divide-x divide-cream-100/10">
-		<!-- Raum- und Außentemperatur: Thermometer pulsiert orange, wenn der Kompressor läuft -->
+	<div class="grid grid-cols-2 divide-x divide-cream-100/10">
+		<!-- Raumtemperatur: Thermometer pulsiert orange, wenn der Kompressor läuft -->
 		<div class="flex items-center gap-3">
 			<div
 				class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors {d.kompressorAn
@@ -70,12 +82,10 @@
 						: 'text-teal-500'}"
 				/>
 			</div>
-			<div class="min-w-0 flex-1">
-	<div class="flex items-baseline gap-3 whitespace-nowrap">
-		<span class="text-2xl font-bold text-cream-100">{fmt(d.raumTemp)}°</span>
-		<span class="text-[11px] font-semibold text-cream-100/50">{fmt(d.aussenTemp)}° außen</span>
-	</div>
-</div>
+			<div>
+				<div class="text-2xl font-bold text-cream-100">{fmt(d.raumTemp)}°</div>
+				<div class="text-xs text-cream-100/50">Temperatur</div>
+			</div>
 		</div>
 
 		<!-- Warmwasser: Tropfen pulsiert orange, wenn aufgeheizt wird -->
@@ -93,7 +103,7 @@
 			</div>
 			<div>
 				<div class="text-2xl font-bold text-cream-100">{fmt(d.warmwasserTemp)}°</div>
-				
+				<div class="text-xs text-cream-100/50">Warmwasser</div>
 			</div>
 		</div>
 	</div>
