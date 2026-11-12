@@ -2,6 +2,7 @@
 import { env } from '$env/dynamic/private';
 import { getVerbrauchHeute, getVerbrauchMonat } from '$lib/server/stromzaehler.index';
 import { getLuefterStatus } from '$lib/server/luefter';
+import { getHausKarte } from '$lib/server/ebus';
 import { isKlingelAktiv, doorbellState } from '$lib/server/mqtt';
 
 const formatEuro = (n: number) => {
@@ -26,6 +27,7 @@ export const load = async () => {
 			kwhMonat: Math.round(monatVal),
 			kostenMonat: formatEuro(monatVal * preisProKwh)
 		},
+		haus: getHausKarte(),
 		luefter: {
 			status: getLuefterStatus()
 		},

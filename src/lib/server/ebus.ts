@@ -110,3 +110,20 @@ export function getEbusRaw() {
 		])
 	);
 }
+
+const num = (x: Wert): number | null => (typeof x === 'number' ? x : null);
+
+export function getHausKarte() {
+	const d = getEbusData();
+	return {
+		raumTemp: num(d.raum.ist_c),
+		aussenTemp: num(d.umwelt.aussentemperatur_c),
+		warmwasserTemp: num(d.warmwasser.speichertemperatur_c),
+		pumpeAn:
+			d.heizkreis.pumpe_laut_regler_an === true || d.heizkreis.mischerkreis.pumpe_an === true,
+		kompressorAn: d.waermepumpe.verdichter_laeuft === true,
+		warmwasserAufbereitung: d.warmwasser.aufbereitung_aktiv === true
+	};
+}
+
+export type HausKarte = ReturnType<typeof getHausKarte>;
