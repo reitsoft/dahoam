@@ -52,15 +52,15 @@
 	<div class="relative flex items-center">
 		<span class="pl-2 text-xs font-bold tracking-wide text-cream-100/50 uppercase">Haus</span>
 
-		<!-- Heizkreispumpe: mittig in der Titelzeile, Text links, Icon rechts -->
-		<span
-			class="absolute left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wide whitespace-nowrap uppercase {d.pumpeAn
-				? 'border-orange-500/30 text-orange-500'
-				: 'border-cream-100/15 text-cream-100/50'}"
-		>
-			Heizkreispumpe {d.pumpeAn ? 'an' : 'aus'}
-			<RefreshCw class="h-3.5 w-3.5 stroke-3 {d.pumpeAn ? 'animate-pulse' : ''}" />
-		</span>
+		{#if d.pumpeAn}
+			<!-- Heizkreispumpe: mittig in der Titelzeile, nur sichtbar wenn die Pumpe läuft -->
+			<span
+				class="absolute left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full border border-orange-500/30 px-2 py-0.5 text-[10px] font-bold tracking-wide whitespace-nowrap text-orange-500 uppercase"
+			>
+				<RefreshCw class="h-3.5 w-3.5 animate-[spin_2s_linear_infinite] stroke-3" />
+				Heizkreispumpe an
+			</span>
+		{/if}
 
 		<!-- Außentemperatur: nur Zahl und Grad -->
 <span class="ml-auto pr-2 text-s font-bold text-cream-100/50" style:color={aussenFarbe(d.aussenTemp)}>
