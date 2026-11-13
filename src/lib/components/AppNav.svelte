@@ -6,15 +6,13 @@
 	import Zap from '@lucide/svelte/icons/zap';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import School from '@lucide/svelte/icons/school';
-	import Activity from '@lucide/svelte/icons/activity';
 
 	const items = [
 		{ href: resolve('/'), label: 'Haus', icon: House },
 		{ href: resolve('/shutters'), label: 'Rollos', icon: PanelsTopLeft },
 		{ href: resolve('/energy'), label: 'Energie', icon: Zap },
 		{ href: resolve('/weather'), label: 'Wetter', icon: SunIcon },
-		{ href: resolve('/school'), label: 'Schule', icon: School },
-		{ href: resolve('/ebus'), label: 'eBus', icon: Activity }
+		{ href: resolve('/school'), label: 'Schule', icon: School }
 	];
 </script>
 

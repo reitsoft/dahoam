@@ -154,10 +154,10 @@
 		{#if d.pumpeAn}
 			<!-- Heizkreispumpe: mittig in der Titelzeile, nur sichtbar wenn die Pumpe läuft -->
 			<span
-				class="absolute left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full border border-orange-500/30 px-2 py-0.5 text-[10px] font-bold tracking-wide whitespace-nowrap text-orange-500 uppercase"
+				class="absolute h-full left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 bg-orange-500/20 text-orange-400 rounded-full px-2 py-3 text-[10px] font-bold tracking-wide whitespace-nowrap text-orange-500/60 uppercase"
 			>
-				<RefreshCw class="h-3.5 w-3.5 animate-[spin_2s_linear_infinite] stroke-3" />
-				Heizkreispumpe an
+				<RefreshCw class="h-4 w-4 animate-[spin_2s_linear_infinite] stroke-3" />
+				<span class="text-orange-400/70">Heizkreispumpe an</span>
 			</span>
 		{/if}
 
