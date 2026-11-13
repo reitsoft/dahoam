@@ -106,11 +106,10 @@ const isEnergy = (m: SmaMetric): m is EnergyMetric => (ENERGY_METRICS as readonl
 
 const iso = (d: Date) => d.toISOString();
 
-/** Gemeinsamer Filter: Measurement, Feld, Metrik-Whitelist. */
+/** Gemeinsamer Filter: Measurement, Feld, Metrik-Whitelist (als == / or, damit er in InfluxDB vorgezogen wird). */
 function baseFilter(metrics: readonly SmaMetric[]): string {
-	const set = metrics.map((m) => `"${m}"`).join(', ');
-	return `|> filter(fn: (r) => r._measurement == "sma_netz" and r._field == "value")
-  |> filter(fn: (r) => contains(value: r.metric, set: [${set}]))`;
+	const alt = metrics.map((m) => `r.metric == "${m}"`).join(' or ');
+	return `|> filter(fn: (r) => r._measurement == "sma_netz" and r._field == "value" and (${alt}))`;
 }
 
 async function runRows(flux: string): Promise<Row[]> {
@@ -137,9 +136,48 @@ function pivot(rows: Row[]): SmaPoint[] {
 /* Zeit-Helfer (Server-Zeitzone, sollte Europe/Berlin sein)            */
 /* ------------------------------------------------------------------ */
 
-export const startOfDay = (d = new Date()) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-export const startOfMonth = (d = new Date()) => new Date(d.getFullYear(), d.getMonth(), 1);
-export const startOfYear = (d = new Date()) => new Date(d.getFullYear(), 0, 1);
+const BERLIN = 'Europe/Berlin';
+const berlinFmt = new Intl.DateTimeFormat('en-US', {
+	timeZone: BERLIN,
+	year: 'numeric',
+	month: 'numeric',
+	day: 'numeric',
+	hour: 'numeric',
+	minute: 'numeric',
+	second: 'numeric',
+	hourCycle: 'h23'
+});
+
+export function berlinParts(d = new Date()) {
+	const p = Object.fromEntries(
+		berlinFmt
+			.formatToParts(d)
+			.filter((x) => x.type !== 'literal')
+			.map((x) => [x.type, Number(x.value)])
+	);
+	return { jahr: p.year, monat: p.month, tag: p.day, stunde: p.hour, minute: p.minute, sekunde: p.second };
+}
+
+/** Berliner Mitternacht (Monat 1–12, über 0/13 wird korrekt umgebrochen) als echter Zeitpunkt. */
+export function berlinMitternacht(jahr: number, monat: number, tag = 1): Date {
+	const utcGuess = Date.UTC(jahr, monat - 1, tag);
+	const b = berlinParts(new Date(utcGuess));
+	const offset = Date.UTC(b.jahr, b.monat - 1, b.tag, b.stunde, b.minute, b.sekunde) - utcGuess;
+	return new Date(utcGuess - offset);
+}
+
+export const startOfDay = (d = new Date()) => {
+	const b = berlinParts(d);
+	return berlinMitternacht(b.jahr, b.monat, b.tag);
+};
+export const startOfMonth = (d = new Date()) => {
+	const b = berlinParts(d);
+	return berlinMitternacht(b.jahr, b.monat, 1);
+};
+export const startOfYear = (d = new Date()) => {
+	const b = berlinParts(d);
+	return berlinMitternacht(b.jahr, 1, 1);
+};
 
 /* ------------------------------------------------------------------ */
 /* Auflösung automatisch wählen                                        */
@@ -346,6 +384,48 @@ export type TagesVerbrauch = {
 
 const round2 = (v: number) => Math.round(v * 100) / 100;
 
+	/** Bezug/Einspeisung seit Berliner Mitternacht: aktueller Stand (raw) − Endstand gestern (1d). */
+async function getHeuteLive(): Promise<{ kwhBuy: number; kwhSell: number } | null> {
+	const heute = startOfDay();
+
+	const gesternFlux = `from(bucket: "${BUCKETS['1d']}")
+  |> range(start: ${iso(new Date(heute.getTime() - 36 * H))}, stop: ${iso(heute)})
+  ${baseFilter(ENERGY_METRICS)}
+  |> last()
+  |> keep(columns: ["_time", "metric", "_value"])`;
+
+	// 2 Tage Vorlauf: kwh_sell wird nachts u. U. nur selten geschrieben
+	const jetztFlux = `from(bucket: "${BUCKETS.raw}")
+  |> range(start: -2d)
+  ${baseFilter(ENERGY_METRICS)}
+  |> last()
+  |> keep(columns: ["_time", "metric", "_value"])`;
+
+	const [g, j] = await Promise.all([
+		runRows(gesternFlux).then(pivot),
+		runRows(jetztFlux).then(pivot)
+	]);
+
+	// kwh_buy und kwh_sell haben bei last() unterschiedliche Zeitstempel, daher zusammenführen
+	const merge = (pts: SmaPoint[]) => Object.assign({}, ...pts.map((p) => p.values)) as SmaValues;
+	const gest = merge(g);
+	const jetzt = merge(j);
+
+	if (
+		gest.kwh_buy === undefined ||
+		gest.kwh_sell === undefined ||
+		jetzt.kwh_buy === undefined ||
+		jetzt.kwh_sell === undefined
+	)
+		return null;
+
+	return {
+		kwhBuy: Math.max(0, jetzt.kwh_buy - gest.kwh_buy),
+		kwhSell: Math.max(0, jetzt.kwh_sell - gest.kwh_sell)
+	};
+}
+
+
 /**
  * Tageswerte des Monats (Standard: laufender Monat) plus Netzbezug des Vormonats.
  * Der erste Tag mit Daten fehlt, weil für die Differenz ein Vorgänger-Zählerstand nötig ist.
@@ -353,18 +433,18 @@ const round2 = (v: number) => Math.round(v * 100) / 100;
 export async function getMonatsVerbrauch(
 	monatStart: Date = startOfMonth()
 ): Promise<{ tage: TagesVerbrauch[]; vormonatNetzbezug: number }> {
-	const y = monatStart.getFullYear();
-	const m = monatStart.getMonth();
-	const naechsterMonat = new Date(y, m + 1, 1);
-	const vormonatStart = new Date(y, m - 1, 1);
-	const tageImMonat = new Date(y, m + 1, 0).getDate();
+	const { jahr, monat } = berlinParts(monatStart);
+	const naechsterMonat = berlinMitternacht(jahr, monat + 1);
+	const vormonatStart = berlinMitternacht(jahr, monat - 1);
+	const tageImMonat = new Date(Date.UTC(jahr, monat, 0)).getUTCDate();
 
-	const [tagesPunkte, vormonat] = await Promise.all([
+	const [tagesPunkte, vormonat, live] = await Promise.all([
 		getEnergy('1d', monatStart, naechsterMonat),
-		getEnergyTotal('1mo', vormonatStart, monatStart)
+		getEnergyTotal('1mo', vormonatStart, monatStart),
+		getHeuteLive()
 	]);
 
-	const proTag = new Map(tagesPunkte.map((p) => [p.time.getDate(), p]));
+	const proTag = new Map(tagesPunkte.map((p) => [berlinParts(p.time).tag, p]));
 
 	const tage = Array.from({ length: tageImMonat }, (_, i): TagesVerbrauch => {
 		const p = proTag.get(i + 1);
@@ -375,6 +455,14 @@ export async function getMonatsVerbrauch(
 			pv: null
 		};
 	});
+
+	// Laufenden Tag mit dem Live-Wert überschreiben (der 1d-Punkt wird nicht laufend aktualisiert)
+	const jetzt = berlinParts();
+	if (live && jetzt.jahr === jahr && jetzt.monat === monat) {
+		const heute = tage[jetzt.tag - 1];
+		heute.netzbezug = round2(live.kwhBuy);
+		heute.einspeisung = round2(live.kwhSell);
+	}
 
 	return { tage, vormonatNetzbezug: round2(vormonat.kwhBuy) };
 }

@@ -145,7 +145,7 @@ for (const shutter of SHUTTER_LIST) {
 // entstehen, die sich gegenseitig disconnecten/reconnecten lassen.
 export const mqttClient =
 	globalThis.__mqttClient ??
-	mqtt.connect('mqtt://192.168.0.100:1883', {
+	mqtt.connect(env.MQTT_URL, {
 		clientId: CLIENT_ID,
 		username: env.MQTT_USER,
 		password: env.MQTT_PASSWORD

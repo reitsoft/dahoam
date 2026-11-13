@@ -1,6 +1,6 @@
 <!-- lib/components/energy/CardMonatSma.svelte-->
 <script lang="ts">
-	import RotateCcwClock from '@lucide/svelte/icons/rotate-ccw-clock';
+	import TrendingUp from '@lucide/svelte/icons/trending-up';
 	import Calendar from '@lucide/svelte/icons/calendar';
 	import { Bar } from 'svelte-chartjs';
 	import {
@@ -18,7 +18,6 @@
 		type ChartOptions,
 		type ScriptableContext
 	} from 'chart.js';
-	import annotationPlugin from 'chartjs-plugin-annotation';
 
 	ChartJS.register(
 		Title,
@@ -29,25 +28,20 @@
 		LineElement,
 		PointElement,
 		LinearScale,
-		CategoryScale,
-		annotationPlugin
+		CategoryScale
 	);
 
-	// Props aus Svelte 5 $props()
 	// netzbezug: kWh aus dem Netz, pv: kWh Eigenverbrauch aus der PV (null = noch keine Daten)
 	let {
-		verbrauchProTag,
-		verbrauchVormonat
+		verbrauchProTag
 	}: {
 		verbrauchProTag: { tag: number; netzbezug: number | null; pv: number | null }[];
-		verbrauchVormonat: number;
 	} = $props();
 
 	// Farben als RGB-Tripel (passend zum Sankey: PV orange, Netz blaugrau)
 	const NETZ_RGB = '110, 140, 190';
 	const PV_RGB = '232, 99, 44';
 
-	// Reaktive Ableitungen via $derived
 	const labels = $derived(verbrauchProTag.map((d) => String(d.tag)));
 	const netzPunkte = $derived(verbrauchProTag.map((d) => d.netzbezug));
 	const pvPunkte = $derived(verbrauchProTag.map((d) => d.pv));
@@ -63,11 +57,11 @@
 	const VERBRAUCH_MONAT = $derived(
 		Math.round(tagesSummen.reduce((sum: number, v) => sum + (v ?? 0), 0) * 10) / 10
 	);
-	const VERBRAUCH_LETZTER_MONAT = $derived(Math.round(verbrauchVormonat * 10) / 10);
 
+	// Höchster Tagesverbrauch des Monats
 	const maxVerbrauch = $derived(Math.max(0, ...tagesSummen.filter((v): v is number => v !== null)));
 
-	// Verlauf je Balkensegment: oben volle Deckkraft, unten 35 %
+	// Verlauf je Balkensegment: oben volle Deckkraft, unten 25 %
 	function verlauf(rgb: string) {
 		return (context: ScriptableContext<'bar'>) => {
 			const { ctx, chartArea } = context.chart;
@@ -89,7 +83,6 @@
 		};
 	}
 
-	// Reaktives Chart-Data Objekt
 	const chartData = $derived<ChartData<'bar'>>({
 		labels,
 		datasets: [
@@ -114,74 +107,54 @@
 		]
 	});
 
-	// Reaktives Chart-Options Objekt
 	const chartOptions = $derived<ChartOptions<'bar'>>({
 		responsive: true,
 		maintainAspectRatio: false,
 		plugins: {
 			legend: { display: false },
 			tooltip: {
-    enabled: true,
-    mode: 'index',
-    intersect: false,
-    displayColors: true,
-    boxWidth: 8,
-    boxHeight: 8,
-    filter: (item) => item.parsed.y !== null && item.parsed.y !== undefined,
-    callbacks: {
-        title: (items) => (items.length ? `Tag ${items[0].label}` : ''),
-        label: (context) => `${context.dataset.label}: ${(context.parsed.y ?? 0).toFixed(1)} kWh`,
-        footer: (items) =>
-            hatPv && items.length
-                ? `Gesamt: ${items.reduce((s, i) => s + (i.parsed.y ?? 0), 0).toFixed(1)} kWh`
-                : ''
-    }
-},
-			annotation: {
-				annotations: {
-					maxLine: {
-						type: 'line',
-						yMin: maxVerbrauch,
-						yMax: maxVerbrauch,
-						borderColor: 'rgba(232, 99, 44, 0.6)',
-						borderWidth: 1,
-						borderDash: [3, 6],
-						label: {
-							display: true,
-							content: `${maxVerbrauch.toFixed(1)} kWh`,
-							position: 'end',
-							backgroundColor: 'rgba(232, 99, 44, 0.85)',
-							color: '#fff',
-							font: { size: 9, weight: 'bolder' },
-							padding: { top: 2, bottom: 2, left: 4, right: 4 },
-							borderRadius: 4,
-							yAdjust: -10
-						}
-					}
+				enabled: true,
+				mode: 'index',
+				intersect: false,
+				displayColors: true,
+				boxWidth: 8,
+				boxHeight: 8,
+				filter: (item) => item.parsed.y !== null && item.parsed.y !== undefined,
+				callbacks: {
+					title: (items) => (items.length ? `Tag ${items[0].label}` : ''),
+					label: (context) =>
+						`${context.dataset.label}: ${(context.parsed.y ?? 0).toFixed(1)} kWh`,
+					footer: (items) =>
+						hatPv && items.length
+							? `Gesamt: ${items.reduce((s, i) => s + (i.parsed.y ?? 0), 0).toFixed(1)} kWh`
+							: ''
 				}
 			}
 		},
 		scales: {
 			x: {
 				stacked: true,
-				grid: { display: false },
-				border: { display: false },
-				ticks: {
-					color: 'rgba(255, 248, 240, 0.3)',
-					font: { size: 10 },
-					maxRotation: 0,
-					callback: (_, index) => {
-						const day = index + 1;
-						return [5, 15, 25].includes(day) ? day : '';
-					}
-				}
+				display:false
+				// grid: { display: false },
+				// border: { display: false },
+				// ticks: {
+				// 	color: 'rgba(255, 248, 240, 0.3)',
+				// 	font: { size: 10 },
+				// 	maxRotation: 0,
+				// 	autoSkip: false,
+				// 	callback: (_, index) => {
+				// 		const day = index + 1;
+				// 		return [5, 10, 15, 20, 25].includes(day) ? day : '';
+				// 	}
+				// }
 			},
 			y: {
 				stacked: true,
 				display: false,
 				grid: { display: false },
 				beginAtZero: true,
-				suggestedMax: maxVerbrauch * 1.3
+				// Höchster Balken füllt die volle Höhe
+				max: maxVerbrauch > 0 ? maxVerbrauch : 1
 			}
 		}
 	});
@@ -212,35 +185,20 @@
 			<div
 				class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cream-100/5 text-cream-100/40"
 			>
-				<RotateCcwClock class="h-5 w-5" />
+				<TrendingUp class="h-5 w-5" />
 			</div>
 			<div class="flex flex-col items-start">
 				<span class="text-xs font-medium tracking-wide text-cream-100/40 uppercase">
-					Vormonat
+					Max Tageswert				
 				</span>
 				<div class="flex items-baseline gap-1">
 					<span class="text-2xl font-semibold tracking-tight text-cream-100/60">
-						{VERBRAUCH_LETZTER_MONAT.toFixed(1)}
+						{maxVerbrauch.toFixed(1)}
 					</span>
 					<span class="text-xs font-medium text-cream-100/30">kWh</span>
 				</div>
 			</div>
 		</div>
-	</div>
-
-	<div class="flex shrink-0 items-center gap-3 px-1 pb-1 text-[10px] text-cream-100/40">
-		<span class="flex items-center gap-1.5">
-			<span class="h-2 w-2 rounded-full" style="background: rgb({NETZ_RGB})"></span>
-			Netzbezug
-		</span>
-		{#if hatPv}
-			<span class="flex items-center gap-1.5">
-				<span class="h-2 w-2 rounded-full" style="background: rgb({PV_RGB})"></span>
-				Eigenerzeugung
-			</span>
-		{:else}
-			<span class="text-cream-100/30">PV-Anteil folgt mit den Wechselrichterdaten</span>
-		{/if}
 	</div>
 
 	<div class="relative h-28 w-full flex-1 overflow-hidden">

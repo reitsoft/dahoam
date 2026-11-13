@@ -1,26 +1,24 @@
 // src/routes/energy/+page.server.ts
-import { 
-    getAktuellerZaehlerstand, 
-    getVerbrauchMonat, 
-    getVerbrauchProTagMonat, 
-    getVerbrauchVormonat,
-    getVerbrauchProMonatJahr 
+import {
+	getAktuellerZaehlerstand,
+	getVerbrauchMonat,
+	getVerbrauchProMonatJahr
 } from '$lib/server/stromzaehler.index';
+import { getMonatsVerbrauch } from '$lib/server/smaHomeManager';
 
 export const load = async () => {
-    const [zaehlerstand, verbrauchProTagRoh, verbrauchVormonat, verbrauchMonat, verbrauchJahr] = await Promise.all([
-        getAktuellerZaehlerstand(),
-        getVerbrauchProTagMonat(),
-        getVerbrauchVormonat(),
-        getVerbrauchMonat(),
-        getVerbrauchProMonatJahr()
-    ]);
+	const [zaehlerstand, monat, verbrauchMonat, verbrauchJahr] = await Promise.all([
+		getAktuellerZaehlerstand(),
+		getMonatsVerbrauch(),
+		getVerbrauchMonat(),
+		getVerbrauchProMonatJahr()
+	]);
 
-    const verbrauchProTag = verbrauchProTagRoh.map(({ tag, value }) => ({
-        tag,
-        netzbezug: value,
-        pv: null as number | null
-    }));
-
-    return { zaehlerstand, verbrauchProTag, verbrauchVormonat, verbrauchMonat, verbrauchJahr };
+	return {
+		zaehlerstand,
+		verbrauchProTag: monat.tage.map(({ tag, netzbezug, pv }) => ({ tag, netzbezug, pv })),
+		verbrauchVormonat: monat.vormonatNetzbezug,
+		verbrauchMonat,
+		verbrauchJahr
+	};
 };
