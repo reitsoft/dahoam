@@ -1,17 +1,16 @@
+<!-- routes/ebus/+page.svelte -->
 <script>
   import { onMount } from 'svelte';
-
   let { data } = $props();
-  let aktuell = $state(null);
-  const ebus = $derived(aktuell ?? data.ebus);
 
-  onMount(() => {
-    const timer = setInterval(async () => {
-      const res = await fetch('/api/ebus');
-      if (res.ok) aktuell = await res.json();
-    }, 5000);
-    return () => clearInterval(timer);
-  });
+  onMount(() => console.table(data.checks.map(({ name, ok, ms, error }) => ({ name, ok, ms, error }))));
 </script>
 
-<pre class="p-4 text-xs text-slate-200">{JSON.stringify(ebus, null, 2)}</pre>
+<div class="space-y-2 p-4 text-sm text-slate-200">
+  {#each data.checks as c}
+    <div>
+      {c.ok ? '✅' : '❌'} {c.name} ({c.ms} ms)
+      <pre class="text-xs">{JSON.stringify(c.ok ? c.result : c.error, null, 2)}</pre>
+    </div>
+  {/each}
+</div>
