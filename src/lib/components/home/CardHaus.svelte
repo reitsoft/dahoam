@@ -148,26 +148,26 @@
 <div
 	class="flex h-full flex-col justify-center gap-4 rounded-3xl border border-navy-800 bg-navy-900 p-3"
 >
-	<div class="relative flex items-center">
-		<span class="pl-2 text-xs font-bold tracking-wide text-cream-100/50 uppercase">Haus</span>
+	<div class="flex items-center justify-between px-1">
+		<span class="pl-1 text-xs font-bold tracking-wide text-cream-100/50 uppercase">Haus</span>
 
 		{#if d.pumpeAn}
-			<!-- Heizkreispumpe: mittig in der Titelzeile, nur sichtbar wenn die Pumpe läuft -->
+			
 			<span
-				class="absolute h-full left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 bg-orange-500/20 text-orange-400 rounded-full px-2 py-3 text-[10px] font-bold tracking-wide whitespace-nowrap text-orange-500/60 uppercase"
+				class="absolute left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 bg-orange-500/20 text-orange-400 rounded-full px-2 py-1 text-[10px] font-bold tracking-wide whitespace-nowrap text-orange-500/60 uppercase"
 			>
 				<RefreshCw class="h-4 w-4 animate-[spin_2s_linear_infinite] stroke-3" />
 				<span class="text-orange-400/70">Heizkreispumpe an</span>
 			</span>
 		{/if}
 
-		<!-- Außentemperatur: nur Zahl und Grad -->
-		<span
-			class="ml-auto pr-2 text-sm font-bold text-cream-100/50"
-			style:color={aussenFarbe(d.aussenTemp)}
+		<!-- Biometrie-Indikator Badge -->
+		<div
+			class="flex items-center gap-1.5 rounded-full bg-cream-100/5 px-2.5 py-1 text-cream-100/40"
 		>
-			{fmt(d.aussenTemp)}°
-		</span>
+			<!-- <FingerprintPattern class="h-3.5 w-3.5 text-teal-500" /> -->
+			<span class="text-sm font-semibold tracking-wider uppercase" style:color={aussenFarbe(d.aussenTemp)}>{fmt(d.aussenTemp)}°</span>
+		</div>
 	</div>
 
 	<div class="grid grid-cols-2 divide-x divide-cream-100/10">
