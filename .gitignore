@@ -8,9 +8,16 @@ node_modules
 /.svelte-kit
 /build
 
+# PWA (vite-plugin-pwa) Dev-Artefakte
+/dev-dist
+
 # OS
 .DS_Store
 Thumbs.db
+
+# Editor
+.idea
+*.swp
 
 # Env
 .env
@@ -21,5 +28,24 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Lokale Laufzeitdaten
 .sensor-cache.json
 .termine.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Tests
+/coverage
+/playwright-report
+/test-results
+
+# Repomix-Ausgabe
+repomix-output.*
+
+# Lokale Datenbank (nur aktivieren, falls zutreffend)
+# *.db
+# *.sqlite
+# *.sqlite-journal
