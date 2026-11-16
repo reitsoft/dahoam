@@ -31,7 +31,7 @@
 	);
 
 	// Batterie
-	let batteryLow = $derived(bad?.batteryPercent != null && bad.batteryPercent < 15);
+	let batteryLow = $derived(bad?.batteryPercent != null && bad.batteryPercent <= 10);
 
 	let showBatteryTooltip = $state(false);
 	let hideTimeout: ReturnType<typeof setTimeout> | undefined;
