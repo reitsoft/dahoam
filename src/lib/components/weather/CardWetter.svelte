@@ -38,16 +38,11 @@ import Clock from '@lucide/svelte/icons/clock';
 	{:else if weather.data}
 		{@const d = weather.data}
 
-		<!-- Standort -->
-		<div class="px-5 pt-2 text-center text-sm font-medium tracking-wide text-cream-100/40">
-			Friedrich-Mezger-Straße 13, 78234 Engen
-		</div>
-
 		<!-- Hero: aktuelle Bedingungen -->
 		<div class="flex items-center justify-center gap-3 px-5 pt-2 pb-4">
 			<span class="text-6xl leading-none" role="img" aria-label={d.condition}>{d.icon}</span>
 			<div class="flex flex-col">
-				<div class="text-4xl font-bold text-cream-100">
+				<div class="text-6xl font-bold text-cream-100">
 					{Math.round(d.temperature)}{d.temperatureUnit}
 				</div>
 				<div class="mt-1 text-sm text-cream-100/60">{d.condition}</div>
