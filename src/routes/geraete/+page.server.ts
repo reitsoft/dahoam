@@ -1,6 +1,7 @@
-import type { PageServerLoad } from './$types';
 import { geschirrspuelerState } from '$lib/server/homeconnect';
+import { waescheStates } from '$lib/server/waesche';
 
-export const load: PageServerLoad = () => ({
-	geschirrspueler: { ...geschirrspuelerState }
+export const load = () => ({
+	geschirrspueler: { ...geschirrspuelerState },
+	waesche: Object.fromEntries(waescheStates)
 });
