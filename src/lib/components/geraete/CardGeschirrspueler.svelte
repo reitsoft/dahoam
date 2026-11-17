@@ -5,17 +5,21 @@
 	import Snowflake from '@lucide/svelte/icons/snowflake';
 	import CircleCheck from '@lucide/svelte/icons/circle-check';
 	import ChevronUp from '@lucide/svelte/icons/chevron-up';
+	import DoorOpen from '@lucide/svelte/icons/door-open';
+	import DoorClosed from '@lucide/svelte/icons/door-closed';
 	import bild from '$lib/assets/geschirrspueler.svg';
 
-	type GsState = {
-		state: string | null;
-		program: string | null;
-		progress: number | null;
-		endsAt: number | null;
-		rinseAidLow: boolean;
-		saltLow: boolean;
-		fertigAm: number | null;
-	};
+
+type GsState = {
+	state: string | null;
+	program: string | null;
+	progress: number | null;
+	endsAt: number | null;
+	rinseAidLow: boolean;
+	saltLow: boolean;
+	doorOpen: boolean | null;
+	fertigAm: number | null;
+};
 
 	let {
 		initial,
@@ -169,25 +173,36 @@
 		</div>
 	</div>
 
-	<!-- Klarspüler und Salz -->
-	<div class="grid grid-cols-2 divide-x divide-cream-100/10 rounded-2xl bg-navy-950 py-3">
-		<div class="flex items-center gap-3 px-4">
-			<Sparkles class="h-5 w-5 shrink-0 stroke-2 {gs.rinseAidLow ? 'text-orange-500' : 'text-cream-100/30'}" />
-			<div>
-				<div class="text-sm font-bold {gs.rinseAidLow ? 'text-orange-500' : 'text-cream-100'}">
-					{gs.rinseAidLow ? 'Fast leer' : 'Ausreichend'}
-				</div>
-				<div class="text-xs text-cream-100/50">Klarspüler</div>
-			</div>
+	<!-- Klarspüler, Salz, Tür -->
+	<div class="grid grid-cols-3 divide-x divide-cream-100/10 rounded-2xl bg-navy-950 py-3">
+	<div class="flex flex-col items-center gap-1 px-2 text-center">
+		<Sparkles
+			class="h-5 w-5 stroke-2 {gs.rinseAidLow ? 'text-orange-500' : 'text-cream-100/30'}"
+		/>
+		<div class="text-sm font-bold {gs.rinseAidLow ? 'text-orange-500' : 'text-cream-100'}">
+			{gs.rinseAidLow ? 'Fast leer' : 'OK'}
 		</div>
-		<div class="flex items-center gap-3 px-4">
-			<Snowflake class="h-5 w-5 shrink-0 stroke-2 {gs.saltLow ? 'text-orange-500' : 'text-cream-100/30'}" />
-			<div>
-				<div class="text-sm font-bold {gs.saltLow ? 'text-orange-500' : 'text-cream-100'}">
-					{gs.saltLow ? 'Fast leer' : 'Ausreichend'}
-				</div>
-				<div class="text-xs text-cream-100/50">Salz</div>
-			</div>
-		</div>
+		<div class="text-xs text-cream-100/50">Klarspüler</div>
 	</div>
+
+	<div class="flex flex-col items-center gap-1 px-2 text-center">
+		<Snowflake class="h-5 w-5 stroke-2 {gs.saltLow ? 'text-orange-500' : 'text-cream-100/30'}" />
+		<div class="text-sm font-bold {gs.saltLow ? 'text-orange-500' : 'text-cream-100'}">
+			{gs.saltLow ? 'Fast leer' : 'OK'}
+		</div>
+		<div class="text-xs text-cream-100/50">Salz</div>
+	</div>
+
+	<div class="flex flex-col items-center gap-1 px-2 text-center">
+		{#if gs.doorOpen}
+			<DoorOpen class="h-5 w-5 stroke-2 text-cream-100" />
+		{:else}
+			<DoorClosed class="h-5 w-5 stroke-2 text-cream-100/30" />
+		{/if}
+		<div class="text-sm font-bold {gs.doorOpen === null ? 'text-cream-100/40' : 'text-cream-100'}">
+			{gs.doorOpen === null ? '–' : gs.doorOpen ? 'Offen' : 'Zu'}
+		</div>
+		<div class="text-xs text-cream-100/50">Tür</div>
+	</div>
+</div>
 </div>

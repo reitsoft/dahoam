@@ -24,6 +24,7 @@ export const geschirrspuelerState = {
 	endsAt: null as number | null, // Unix-ms, voraussichtliches Ende
 	rinseAidLow: false,
 	saltLow: false,
+	doorOpen: null as boolean | null, // null = noch unbekannt
 	fertigAm: null as number | null
 };
 
@@ -115,6 +116,10 @@ function applyItem(key: string, value: unknown) {
 			break;
 		case 'BSH.Common.Option.RemainingProgramTime':
 			s.endsAt = Date.now() + Number(value) * 1000;
+			break;
+		case 'BSH.Common.Status.DoorState':
+			s.doorOpen = last === 'Open'; // "Closed" und "Locked" gelten als zu
+			mqttClient.publish(`${BASE}/tuer`, last, { retain: true });
 			break;
 		case 'Dishcare.Dishwasher.Event.RinseAidNearlyEmpty':
 			s.rinseAidLow = last === 'Present';
