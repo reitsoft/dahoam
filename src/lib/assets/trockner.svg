@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" fill="none">
+  <defs>
+    <radialGradient id="bg-glow-dry" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="body-grad-dry" x1="40" y1="20" x2="200" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E2E8F0"/>
+    </linearGradient>
+    <linearGradient id="heat-grad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#EA580C"/>
+      <stop offset="100%" stop-color="#FBBF24"/>
+    </linearGradient>
+    <filter id="card-shadow-dry" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#0F172A" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <circle cx="120" cy="120" r="110" fill="url(#bg-glow-dry)"/>
+
+  <!-- Gehäuse -->
+  <rect x="48" y="24" width="144" height="192" rx="18" fill="url(#body-grad-dry)" stroke="#CBD5E1" stroke-width="2" filter="url(#card-shadow-dry)"/>
+  <line x1="48" y1="64" x2="192" y2="64" stroke="#CBD5E1" stroke-width="2"/>
+
+  <!-- Kondenswasser-Tank -->
+  <rect x="62" y="36" width="44" height="16" rx="4" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1.5"/>
+  <rect x="68" y="42" width="32" height="4" rx="2" fill="#CBD5E1"/>
+
+  <!-- Display -->
+  <rect x="122" y="38" width="24" height="12" rx="3" fill="#0F172A"/>
+  <circle cx="128" cy="44" r="2" fill="#FBBF24"/>
+  <circle cx="135" cy="44" r="2" fill="#FBBF24"/>
+
+  <!-- Drehrad -->
+  <circle cx="168" cy="44" r="10" fill="#FFFFFF" stroke="#64748B" stroke-width="2"/>
+  <line x1="168" y1="44" x2="163" y2="39" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Bullauge (Dunkles Design-Glas) -->
+  <circle cx="120" cy="136" r="52" fill="#334155" stroke="#1E293B" stroke-width="3"/>
+  <circle cx="120" cy="136" r="42" fill="#1E293B"/>
+
+  <!-- Warmluft-Wellen im Inneren -->
+  <path d="M104 152 C 100 142, 110 134, 106 122" stroke="url(#heat-grad)" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M120 155 C 116 143, 126 133, 122 119" stroke="url(#heat-grad)" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M136 152 C 132 142, 142 134, 138 122" stroke="url(#heat-grad)" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- Glas-Reflexion -->
+  <path d="M90 114 A 40 40 0 0 1 138 100" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" opacity="0.25"/>
+  <!-- Griffmulde -->
+  <rect x="163" y="124" width="5" height="24" rx="2.5" fill="#94A3B8"/>
+</svg>
