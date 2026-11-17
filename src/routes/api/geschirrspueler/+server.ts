@@ -1,3 +1,4 @@
+// src/routes/api/geschirrspueler/+server.ts
 import { json } from '@sveltejs/kit';
 import { geschirrspuelerState } from '$lib/server/homeconnect';
 
