@@ -1,5 +1,6 @@
+import type { PageServerLoad } from './$types';
 import { geschirrspuelerState } from '$lib/server/homeconnect';
 
-export const load = async () => {
-  return { geschirrspueler: { ...geschirrspuelerState } };
-};
+export const load: PageServerLoad = () => ({
+	geschirrspueler: { ...geschirrspuelerState }
+});
