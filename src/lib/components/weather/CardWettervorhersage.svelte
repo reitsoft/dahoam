@@ -14,7 +14,7 @@
 	}
 </script>
 
-<div class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-navy-800 bg-navy-900 shadow-lg">
+<div class="shrink-0 flex-col overflow-hidden rounded-3xl border border-navy-800 bg-navy-900 shadow-lg">
 	{#if weather.loading && !weather.data}
 		<div class="flex h-56 items-center justify-center">
 			<div class="h-6 w-6 animate-spin rounded-full border-2 border-teal-500 border-t-transparent"></div>
