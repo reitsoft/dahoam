@@ -2,7 +2,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { HausKarte } from '$lib/server/ebus';
-	import Drawer from '$lib/components/Drawer.svelte';
+	import Drawer from '$lib/components/BottomDrawer.svelte';
 	import WetterDrawer from '$lib/components/weather/WetterDrawer.svelte';
 	import Droplets from '@lucide/svelte/icons/droplets';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
