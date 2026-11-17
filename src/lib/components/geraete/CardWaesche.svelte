@@ -1,7 +1,8 @@
+<!-- src/lib/components/geraete/CardWaesche.svelte -->
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import type { Component } from 'svelte';
 	import CircleCheck from '@lucide/svelte/icons/circle-check';
+	import ChevronUp from '@lucide/svelte/icons/chevron-up';
 
 	type Status = {
 		status: 'BEREIT' | 'LAEUFT' | 'FERTIG';
@@ -12,9 +13,20 @@
 	let {
 		id,
 		name,
-		icon: Icon,
-		initial
-	}: { id: string; name: string; icon: Component<any>; initial: Status } = $props();
+		bild,
+		initial,
+		verbrauchMonat = null,
+		verbrauchVormonat = null,
+		onDetails
+	}: {
+		id: string;
+		name: string;
+		bild: string;
+		initial: Status;
+		verbrauchMonat?: number | null; // kWh
+		verbrauchVormonat?: number | null; // kWh
+		onDetails?: () => void; // später: BottomDrawer öffnen
+	} = $props();
 
 	let s = $state<Status>(untrack(() => initial));
 	let jetzt = $state(Date.now());
@@ -25,18 +37,18 @@
 	const zeit = (ms: number) =>
 		new Date(ms).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
+	const kwh = (v: number | null) => (v == null ? '–' : v.toFixed(1).replace('.', ','));
+
 	let laufzeit = $derived.by(() => {
 		if (!laeuft || !s.startedAt) return '';
 		const min = Math.max(Math.floor((jetzt - s.startedAt) / 60000), 0);
 		const h = Math.floor(min / 60);
-		return h > 0 ? `${h} Std ${min % 60} Min` : `${min} Min`;
+		return h > 0 ? `Seit ${h} Std ${min % 60} Min` : `Seit ${min} Min`;
 	});
 
-	let statusText = $derived(
-		laeuft ? 'Läuft' : fertig ? 'Fertig' : 'Bereit'
-	);
+	let statusText = $derived(laeuft ? 'Läuft' : fertig ? 'Fertig' : 'Bereit');
 	let detail = $derived(
-		laeuft ? laufzeit : fertig && s.fertigAm ? `seit ${zeit(s.fertigAm)}` : ''
+		laeuft ? laufzeit : fertig && s.fertigAm ? `Seit ${zeit(s.fertigAm)} Uhr` : ''
 	);
 
 	async function sync() {
@@ -70,31 +82,66 @@
 	});
 </script>
 
-<div
-	class="flex h-full flex-col justify-between gap-3 rounded-3xl border border-navy-800 bg-navy-900 p-3"
->
-	<div class="flex items-center justify-between">
-		<div
-			class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full {laeuft
-				? 'bg-teal-500/10'
-				: 'bg-cream-100/5'}"
-		>
-			<Icon
-				class="h-5 w-5 stroke-3 {laeuft ? 'animate-pulse text-teal-500' : 'text-cream-100/40'}"
-			/>
+<div class="flex flex-col gap-4 rounded-3xl border border-navy-800 bg-navy-900 p-4">
+	<div class="flex items-stretch gap-4">
+		<img
+			src={bild}
+			alt=""
+			class="h-32 w-32 shrink-0 object-contain transition-opacity {laeuft || fertig
+				? 'opacity-100'
+				: 'opacity-60'}"
+		/>
+
+		<div class="flex min-w-0 flex-1 flex-col justify-between">
+			<div class="flex items-start justify-between gap-2">
+				<span class="pt-1.5 text-xs font-bold tracking-wide text-cream-100/50 uppercase">
+					{name}
+				</span>
+
+				<!-- Platzhalter für den späteren BottomDrawer -->
+				<button
+					type="button"
+					onclick={() => onDetails?.()}
+					class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cream-100/10 bg-navy-950 text-cream-100/50 transition-colors hover:text-cream-100"
+					aria-label="Details zu {name} öffnen"
+				>
+					<ChevronUp class="h-5 w-5 stroke-2" />
+				</button>
+			</div>
+
+			<div>
+				<div class="flex items-center gap-2">
+					<span
+						class="text-3xl font-bold {laeuft
+							? 'text-teal-500'
+							: fertig
+								? 'text-cream-100'
+								: 'text-cream-100/40'}"
+					>
+						{statusText}
+					</span>
+					{#if fertig}
+						<CircleCheck class="h-6 w-6 stroke-2 text-teal-500" aria-label="Fertig" />
+					{/if}
+				</div>
+				<div class="h-5 text-sm text-cream-100/50">{detail}</div>
+			</div>
 		</div>
-		{#if fertig}
-			<CircleCheck class="h-6 w-6 stroke-2 text-teal-500" aria-label="Fertig" />
-		{/if}
 	</div>
 
-	<div class="px-1">
-		<div class="text-xs font-bold tracking-wide text-cream-100/50 uppercase">{name}</div>
-		<div
-			class="text-lg font-bold {laeuft || fertig ? 'text-cream-100' : 'text-cream-100/40'}"
-		>
-			{statusText}
+	<!-- Verbrauch -->
+	<div class="grid grid-cols-2 divide-x divide-cream-100/10 rounded-2xl bg-navy-950 py-3">
+		<div class="px-4">
+			<div class="text-2xl font-bold text-cream-100">
+				{kwh(verbrauchMonat)}<span class="ml-1 text-sm font-medium text-cream-100/50">kWh</span>
+			</div>
+			<div class="text-xs text-cream-100/50">Dieser Monat</div>
 		</div>
-		<div class="h-4 text-xs text-cream-100/50">{detail}</div>
+		<div class="px-4">
+			<div class="text-2xl font-bold text-cream-100">
+				{kwh(verbrauchVormonat)}<span class="ml-1 text-sm font-medium text-cream-100/50">kWh</span>
+			</div>
+			<div class="text-xs text-cream-100/50">Letzter Monat</div>
+		</div>
 	</div>
 </div>
