@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Droplet from '@lucide/svelte/icons/droplet';
-import Wind from '@lucide/svelte/icons/wind';
-import CloudRain from '@lucide/svelte/icons/cloud-rain';
-import Clock from '@lucide/svelte/icons/clock';
-	import { createWeatherStore } from '$lib/stores/weather.svelte';
+	import Wind from '@lucide/svelte/icons/wind';
+	import CloudRain from '@lucide/svelte/icons/cloud-rain';
+	import Clock from '@lucide/svelte/icons/clock';
+	import type { createWeatherStore } from '$lib/stores/weather.svelte';
 
-	const weather = createWeatherStore();
+	let { weather }: { weather: ReturnType<typeof createWeatherStore> } = $props();
 
 	function formatHour(iso: string) {
 		const date = new Date(iso);
