@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" fill="none">
+  <defs>
+    <radialGradient id="bg-glow-dish" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="body-grad-dish" x1="40" y1="20" x2="200" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E2E8F0"/>
+    </linearGradient>
+    <filter id="card-shadow-dish" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#0F172A" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <circle cx="120" cy="120" r="110" fill="url(#bg-glow-dish)"/>
+
+  <!-- Gehäuse -->
+  <rect x="48" y="24" width="144" height="192" rx="18" fill="url(#body-grad-dish)" stroke="#CBD5E1" stroke-width="2" filter="url(#card-shadow-dish)"/>
+  
+  <!-- Obere Bedienblende -->
+  <line x1="48" y1="58" x2="192" y2="58" stroke="#CBD5E1" stroke-width="2"/>
+  
+  <!-- Griffmulde -->
+  <rect x="92" y="34" width="56" height="14" rx="4" fill="#CBD5E1"/>
+  
+  <!-- Status-LEDs -->
+  <circle cx="68" cy="41" r="3" fill="#10B981"/>
+  <circle cx="78" cy="41" r="3" fill="#94A3B8"/>
+  <circle cx="164" cy="41" r="3" fill="#94A3B8"/>
+  <circle cx="174" cy="41" r="3" fill="#94A3B8"/>
+
+  <!-- Sichtfenster / Innenraum-Darstellung -->
+  <rect x="64" y="74" width="112" height="124" rx="12" fill="#0F172A" stroke="#94A3B8" stroke-width="2"/>
+
+  <!-- Geschirrkorb-Gitter -->
+  <line x1="74" y1="168" x2="166" y2="168" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <line x1="86" y1="154" x2="86" y2="168" stroke="#475569" stroke-width="2"/>
+  <line x1="104" y1="154" x2="104" y2="168" stroke="#475569" stroke-width="2"/>
+  <line x1="122" y1="154" x2="122" y2="168" stroke="#475569" stroke-width="2"/>
+
+  <!-- Teller (hintereinander gestaffelt) -->
+  <path d="M84 166 A 24 24 0 0 1 84 118" stroke="#E2E8F0" stroke-width="4" stroke-linecap="round"/>
+  <path d="M100 166 A 24 24 0 0 1 100 118" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round"/>
+  <path d="M116 166 A 24 24 0 0 1 116 118" stroke="#94A3B8" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Weinglas / Becher rechts -->
+  <path d="M136 122 H 156 L 153 142 C 152 147, 140 147, 139 142 Z" fill="#38BDF8" fill-opacity="0.25" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="146" y1="146" x2="146" y2="164" stroke="#38BDF8" stroke-width="2"/>
+  <line x1="139" y1="165" x2="153" y2="165" stroke="#38BDF8" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Glanz-Sterne (Sauberkeit) -->
+  <path d="M148 92 L 150 98 L 156 100 L 150 102 L 148 108 L 146 102 L 140 100 L 146 98 Z" fill="#10B981"/>
+  <path d="M86 96 L 87 100 L 91 101 L 87 102 L 86 106 L 85 102 L 81 101 L 85 100 Z" fill="#34D399"/>
+</svg>
