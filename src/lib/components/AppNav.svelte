@@ -13,7 +13,7 @@
 		{ href: resolve('/'), label: 'Haus', icon: House },
 		{ href: resolve('/shutters'), label: 'Rollos', icon: PanelsTopLeft },
 		{ href: resolve('/energy'), label: 'Energie', icon: Zap },
-		{ href: resolve('/geraete'), label: 'Geräte', icon: WashingMachine }
+		{ href: resolve('/geraete'), label: 'Geräte', icon: WashingMachine },
 		{ href: resolve('/weather'), label: 'Wetter', icon: SunIcon },
 		{ href: resolve('/school'), label: 'Schule', icon: School }
 	];
