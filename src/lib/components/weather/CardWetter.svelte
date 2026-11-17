@@ -54,31 +54,39 @@
 			{/if}
 		</div>
 
-		<!-- Stat-Chips: Regen / Feuchtigkeit / Wind -->
+				<!-- Stat-Chips: Regen / Feuchtigkeit / Wind -->
 		<div class="grid grid-cols-3 gap-2 px-4 pb-3">
 			<div
-				class="flex flex-col items-center gap-1 rounded-2xl border border-cream-100/5 bg-navy-950/50 py-3"
+				class="flex flex-col items-center gap-0.5 rounded-2xl border border-cream-100/5 bg-navy-950/50 py-2"
 			>
-				<CloudRain class="h-4 w-4 text-blue-400" />
-				<span class="text-sm font-bold text-cream-100">
-					{d.isRaining ? `${d.rainAmount} mm` : `${d.today?.rainProbability ?? 0}%`}
-				</span>
+				<div class="flex items-center gap-1.5">
+					<CloudRain class="h-4 w-4 shrink-0 text-blue-400" />
+					<span class="text-sm font-bold whitespace-nowrap text-cream-100">
+						{d.isRaining ? `${d.rainAmount} mm` : `${d.today?.rainProbability ?? 0}%`}
+					</span>
+				</div>
 				<span class="text-[10px] text-cream-100/40">Regen</span>
 			</div>
 			<div
-				class="flex flex-col items-center gap-1 rounded-2xl border border-cream-100/5 bg-navy-950/50 py-3"
+				class="flex flex-col items-center gap-0.5 rounded-2xl border border-cream-100/5 bg-navy-950/50 py-2"
 			>
-				<Droplet class="h-4 w-4 text-blue-300" />
-				<span class="text-sm font-bold text-cream-100">{d.humidity}{d.humidityUnit}</span>
+				<div class="flex items-center gap-1.5">
+					<Droplet class="h-4 w-4 shrink-0 text-blue-300" />
+					<span class="text-sm font-bold whitespace-nowrap text-cream-100">
+						{d.humidity}{d.humidityUnit}
+					</span>
+				</div>
 				<span class="text-[10px] text-cream-100/40">Feuchtigkeit</span>
 			</div>
 			<div
-				class="flex flex-col items-center gap-1 rounded-2xl border border-cream-100/5 bg-navy-950/50 py-3"
+				class="flex flex-col items-center gap-0.5 rounded-2xl border border-cream-100/5 bg-navy-950/50 py-2"
 			>
-				<Wind class="h-4 w-4 text-amber-400" />
-				<span class="text-sm font-bold text-cream-100"
-					>{Math.round(d.windSpeed)} {d.windSpeedUnit}</span
-				>
+				<div class="flex items-center gap-1.5">
+					<Wind class="h-4 w-4 shrink-0 text-amber-400" />
+					<span class="text-sm font-bold whitespace-nowrap text-cream-100">
+						{Math.round(d.windSpeed)} {d.windSpeedUnit}
+					</span>
+				</div>
 				<span class="text-[10px] text-cream-100/40">Wind</span>
 			</div>
 		</div>
@@ -86,13 +94,7 @@
 		<!-- Stündliche Vorhersage -->
 		{#if d.hourly?.length}
 			<div class="border-t border-cream-100/10 bg-navy-950/40 px-4 py-2">
-				<!-- Header mit Icon + Titel -->
-				<div class="mb-3 flex items-center gap-2 px-1">
-					<Clock class="h-3.5 w-3.5 text-cream-100/50" />
-					<span class="text-xs font-semibold text-cream-100/70">Stündliche Vorhersage</span>
-				</div>
-
-				<!-- Horizontale Stunden-Leiste -->
+							<!-- Horizontale Stunden-Leiste -->
 				<div class="-mx-1 flex scrollbar-none gap-4 overflow-x-auto px-1 pb-1">
 					{#each d.hourly as h, i}
 						<div class="flex min-w-[38px] flex-col items-center gap-1.5">
