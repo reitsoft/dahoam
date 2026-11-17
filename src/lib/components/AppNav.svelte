@@ -4,7 +4,6 @@
 	import House from '@lucide/svelte/icons/house';
 	import PanelsTopLeft from '@lucide/svelte/icons/panels-top-left';
 	import Zap from '@lucide/svelte/icons/zap';
-	import SunIcon from '@lucide/svelte/icons/sun';
 	import WashingMachine from '@lucide/svelte/icons/washing-machine';
 	import School from '@lucide/svelte/icons/school';
 
@@ -14,7 +13,6 @@
 		{ href: resolve('/shutters'), label: 'Rollos', icon: PanelsTopLeft },
 		{ href: resolve('/energy'), label: 'Energie', icon: Zap },
 		{ href: resolve('/geraete'), label: 'Geräte', icon: WashingMachine },
-		{ href: resolve('/weather'), label: 'Wetter', icon: SunIcon },
 		{ href: resolve('/school'), label: 'Schule', icon: School }
 	];
 </script>
