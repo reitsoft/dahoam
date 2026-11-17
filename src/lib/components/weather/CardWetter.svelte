@@ -39,19 +39,19 @@
 		{@const d = weather.data}
 
 		<!-- Hero: aktuelle Bedingungen -->
-		<div class="flex items-center justify-center gap-3 px-5 pt-2 pb-4">
-			<span class="text-6xl leading-none" role="img" aria-label={d.condition}>{d.icon}</span>
-			<div class="flex flex-col">
-				<div class="text-6xl font-bold text-cream-100">
+		<div class="flex flex-col items-center gap-1 px-4 pt-3 pb-4">
+			<div class="flex items-center justify-center gap-3">
+				<span class="text-5xl leading-none" role="img" aria-label={d.condition}>{d.icon}</span>
+				<div class="text-4xl leading-none font-bold text-cream-100">
 					{Math.round(d.temperature)}{d.temperatureUnit}
 				</div>
-				<div class="mt-1 text-sm text-cream-100/60">{d.condition}</div>
-				{#if d.today}
-					<div class="mt-1 text-xs text-cream-100/40">
-						Hoch: {Math.round(d.today.tempMax)}° / Tief: {Math.round(d.today.tempMin)}°
-					</div>
-				{/if}
+				<div class="min-w-0 text-sm leading-tight text-cream-100/60">{d.condition}</div>
 			</div>
+			{#if d.today}
+				<div class="text-xs text-cream-100/40">
+					Hoch: {Math.round(d.today.tempMax)}° / Tief: {Math.round(d.today.tempMin)}°
+				</div>
+			{/if}
 		</div>
 
 		<!-- Stat-Chips: Regen / Feuchtigkeit / Wind -->
