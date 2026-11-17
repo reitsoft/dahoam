@@ -1,12 +1,12 @@
-<!-- routes/geraete/+page.svelte -->
+<!-- src/routes/geraete/+page.svelte -->
 <script lang="ts">
 	import type { PageProps } from './$types';
 	import Viewport from '$lib/components/Viewport.svelte';
 	import AppHeader from '$lib/components/AppHeader.svelte';
 	import CardGeschirrspueler from '$lib/components/geraete/CardGeschirrspueler.svelte';
 	import CardWaesche from '$lib/components/geraete/CardWaesche.svelte';
-	import WashingMachine from '@lucide/svelte/icons/washing-machine';
-	import Wind from '@lucide/svelte/icons/wind';
+	import waschmaschineBild from '$lib/assets/waschmaschine.svg';
+	import trocknerBild from '$lib/assets/trockner.svg';
 
 	let { data }: PageProps = $props();
 </script>
@@ -14,16 +14,19 @@
 <Viewport>
 	<AppHeader title="Geräte" />
 
-	<main class="grid min-h-0 flex-1 grid-cols-2 content-start gap-3 px-4 pb-3">
-		<div class="col-span-2">
-			<CardGeschirrspueler initial={data.geschirrspueler} />
-		</div>
+	<main class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-3">
+		<CardGeschirrspueler initial={data.geschirrspueler} />
 		<CardWaesche
 			id="waschmaschine"
 			name="Waschmaschine"
-			icon={WashingMachine}
+			bild={waschmaschineBild}
 			initial={data.waesche.waschmaschine}
 		/>
-		<CardWaesche id="trockner" name="Trockner" icon={Wind} initial={data.waesche.trockner} />
+		<CardWaesche
+			id="trockner"
+			name="Trockner"
+			bild={trocknerBild}
+			initial={data.waesche.trockner}
+		/>
 	</main>
 </Viewport>
