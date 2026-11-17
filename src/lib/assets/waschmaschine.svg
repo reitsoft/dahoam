@@ -1,1 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" fill="none">
+  <defs>
+    <!-- Hintergrund-Glow -->
+    <radialGradient id="bg-glow-wash" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Gehäuse-Verlauf -->
+    <linearGradient id="body-grad" x1="40" y1="20" x2="200" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E2E8F0"/>
+    </linearGradient>
+    <!-- Wasser-Verlauf -->
+    <linearGradient id="water-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+    <!-- Schatten -->
+    <filter id="card-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#0F172A" flood-opacity="0.12"/>
+    </filter>
+  </defs>
 
+  <!-- Hintergrund-Kreis -->
+  <circle cx="120" cy="120" r="110" fill="url(#bg-glow-wash)"/>
+
+  <!-- Geräte-Gehäuse -->
+  <rect x="48" y="24" width="144" height="192" rx="18" fill="url(#body-grad)" stroke="#CBD5E1" stroke-width="2" filter="url(#card-shadow)"/>
+
+  <!-- Bedienfeld-Trennlinie -->
+  <line x1="48" y1="64" x2="192" y2="64" stroke="#CBD5E1" stroke-width="2"/>
+
+  <!-- Waschmittelschublade -->
+  <rect x="62" y="36" width="44" height="16" rx="4" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1.5"/>
+  <line x1="76" y1="44" x2="92" y2="44" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Status-LEDs & Display -->
+  <rect x="122" y="38" width="24" height="12" rx="3" fill="#0F172A"/>
+  <circle cx="128" cy="44" r="2" fill="#38BDF8"/>
+  <circle cx="135" cy="44" r="2" fill="#38BDF8"/>
+  
+  <!-- Programmwähler -->
+  <circle cx="168" cy="44" r="10" fill="#FFFFFF" stroke="#64748B" stroke-width="2"/>
+  <line x1="168" y1="44" x2="173" y2="39" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Bullauge Außenring -->
+  <circle cx="120" cy="136" r="52" fill="#F8FAFC" stroke="#94A3B8" stroke-width="3"/>
+  <circle cx="120" cy="136" r="44" fill="#0F172A"/>
+
+  <!-- Trommel-Inhalt (Wasser & Schaum) -->
+  <clipPath id="drum-clip">
+    <circle cx="120" cy="136" r="41"/>
+  </clipPath>
+  <g clip-path="url(#drum-clip)">
+    <!-- Wasserwelle -->
+    <path d="M75 138 Q 97 126, 120 138 T 165 138 L 165 185 L 75 185 Z" fill="url(#water-grad)"/>
+    <!-- Luftblasen -->
+    <circle cx="102" cy="126" r="4" fill="#BAE6FD" opacity="0.7"/>
+    <circle cx="134" cy="120" r="6" fill="#BAE6FD" opacity="0.5"/>
+    <circle cx="118" cy="152" r="3" fill="#FFFFFF" opacity="0.6"/>
+  </g>
+
+  <!-- Glas-Reflexion -->
+  <path d="M92 112 A 38 38 0 0 1 135 100" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+  <!-- Türgriff -->
+  <rect x="163" y="126" width="6" height="20" rx="3" fill="#64748B"/>
+</svg>
