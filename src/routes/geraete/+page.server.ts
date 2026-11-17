@@ -1,5 +1,5 @@
 import { geschirrspuelerState } from '$lib/server/homeconnect';
 
-export async function load() {
-  return { /* ... */ geschirrspueler: { ...geschirrspuelerState } };
+export const load = async () => {
+  return { geschirrspueler: { ...geschirrspuelerState } };
 };
