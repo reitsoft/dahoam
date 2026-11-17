@@ -2,7 +2,7 @@
 	import CalendarDays from '@lucide/svelte/icons/calendar-days';
 	import type { createWeatherStore } from '$lib/stores/weather.svelte';
 
-	let { weather }: { weather: ReturnType<typeof createWeatherStore> } = $props
+	let { weather }: { weather: ReturnType<typeof createWeatherStore> } = $props();
 
 	function formatWochentag(iso: string, index: number) {
 		if (index === 0) return 'Morgen';
