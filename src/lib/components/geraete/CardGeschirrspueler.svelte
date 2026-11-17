@@ -1,3 +1,4 @@
+<!-- src/lib/components/geraete/CardGeschirrspueler.svelte -->
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import WashingMachine from '@lucide/svelte/icons/washing-machine';
