@@ -1,42 +1,143 @@
-# sv
+# 🏡 Dahoam
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Lokales Smart-Home- und Familien-Dashboard als **Progressive Web App** – Rolläden, Heizung, Energie/PV, Lüftung, Haustür, Wetter und Stundenplan in einer Oberfläche.
 
-## Creating a project
+![SvelteKit](https://img.shields.io/badge/SvelteKit-Svelte_5-FF3E00?logo=svelte&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)
+![MQTT](https://img.shields.io/badge/MQTT-Echtzeit-660066?logo=mqtt&logoColor=white)
+![InfluxDB](https://img.shields.io/badge/InfluxDB-v2-22ADF6?logo=influxdb&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Features
 
-```sh
-# create a new project
-npx sv create my-app
+| Bereich | Beschreibung |
+| --- | --- |
+| **Rolläden** | Steuerung von Shelly-Rolläden (öffnen, schließen, stoppen, Position anfahren) mit Live-Status |
+| **Haustür & Klingel** | Türöffner und Klingelsteuerung inkl. Stummschaltung; sicherheitskritische Aktionen sind per Passkey (WebAuthn) geschützt |
+| **Heizung** | Telemetrie von Wärmepumpe und Regelung über eBUS (`ebusd`) |
+| **Lüftung** | Automatische Bad-Lüfter-Steuerung nach Luftfeuchte sowie Taupunkt-Bewertung für die Kellerlüftung |
+| **Energie & PV** | Verbrauch, Bezug, Einspeisung und Stromfluss (Sankey) aus InfluxDB |
+| **Wetter** | Aktuelle Werte und Vorhersage über Open-Meteo |
+| **Schule** | Stundenplan, Ferientermine und Schultermine |
+| **PWA** | Installierbar, Standalone-Modus, für Portrait-Nutzung optimiert |
+
+## Tech-Stack
+
+- **Framework:** SvelteKit mit Svelte 5 (Runes), TypeScript
+- **Runtime:** Node.js (`@sveltejs/adapter-node`)
+- **Styling:** Tailwind CSS v4, Lucide Icons
+- **Charts:** Chart.js
+- **Messaging:** MQTT (`mqtt.js`)
+- **Zeitreihen:** InfluxDB v2
+- **Auth:** WebAuthn / Passkeys (`@simplewebauthn`)
+- **Tooling:** pnpm, Vite, Vitest, ESLint, Prettier
+- **CI/CD:** GitHub Actions
+
+## Architektur
+
+```text
+[Smart-Home-Geräte] ◄──(MQTT)──► [SvelteKit Node Server] ◄──► [InfluxDB]
+                                       │          ▲
+                                 (SSE / REST)   (REST)
+                                       ▼          │
+                             [Browser / PWA (Svelte 5)]
+                                       │
+                                       ▼
+                               [Open-Meteo API]
 ```
 
-To recreate this project with the same configuration:
+- Der Server hält eine dauerhafte MQTT-Verbindung und verteilt Zustandsänderungen per **Server-Sent Events** an die Clients.
+- Energiedaten werden aus mehreren InfluxDB-Buckets aggregiert und mit Live-Werten kombiniert.
+- Automatisierungen (z. B. Lüfter) laufen im Server-Prozess und überstehen Neustarts durch lokale Persistenz.
 
-```sh
-# recreate this project
-pnpm dlx sv@0.17.0 create --template minimal --types ts --add prettier eslint tailwindcss="plugins:typography,forms" --install pnpm .
+## Projektstruktur
+
+```text
+├── .github/workflows/   # CI/CD
+├── data/                # Lokale Laufzeitdaten (nicht versioniert)
+├── src/
+│   ├── lib/
+│   │   ├── components/  # UI-Komponenten nach Domäne
+│   │   ├── config/      # Geräte- und Schulkonfiguration
+│   │   ├── server/      # Serverlogik (MQTT, InfluxDB, eBUS, Auth, …)
+│   │   ├── stores/      # Reaktive Svelte-5-Stores
+│   │   └── utilities/   # Hilfsfunktionen
+│   └── routes/          # Seiten und Backend-API
+└── static/              # PWA-Manifest, Icons, Fonts
 ```
 
-## Developing
+## Voraussetzungen
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+- Node.js und [pnpm](https://pnpm.io)
+- MQTT-Broker mit Shelly-Geräten
+- InfluxDB v2 mit Strom-/PV-Daten
+- Optional: `ebusd` für Heizungsdaten
+- HTTPS für die Passkey-Funktion (in der Entwicklung genügt `localhost`)
 
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
+## Installation & Entwicklung
 
 ```sh
-npm run build
+git clone https://github.com/<user>/dahoam.git
+cd dahoam
+pnpm install
+cp .env.example .env   # Werte anpassen
+pnpm dev
 ```
 
-You can preview the production build with `npm run preview`.
+Ohne InfluxDB lässt sich die Energie-Ansicht mit Mock-Daten testen:
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```sh
+USE_MOCK_DATA=true pnpm dev
+```
+
+| Befehl | Zweck |
+| --- | --- |
+| `pnpm dev` | Entwicklungsserver |
+| `pnpm build` | Produktions-Build |
+| `pnpm preview` | Build lokal ansehen |
+| `pnpm check` | Typprüfung |
+| `pnpm lint` / `pnpm format` | Linting / Formatierung |
+| `pnpm test` | Unit-Tests |
+
+## Konfiguration
+
+Zugangsdaten werden ausschließlich über Umgebungsvariablen geladen und gehören **nicht** ins Repository.
+
+| Variable | Beschreibung |
+| --- | --- |
+| `MQTT_URL`, `MQTT_USER`, `MQTT_PASSWORD` | Verbindung zum MQTT-Broker |
+| `INFLUX_URL`, `INFLUX_TOKEN`, `INFLUX_ORG`, `INFLUX_BUCKET` | InfluxDB-Zugang |
+| `WEBAUTHN_RP_ID`, `WEBAUTHN_ORIGIN`, `WEBAUTHN_SETUP_SECRET` | Passkey-Konfiguration |
+| `PREIS_PRO_KWH` | Optional: Strompreis für die Kostenanzeige |
+| `DATA_DIR` | Optional: Verzeichnis für lokale Laufzeitdaten |
+| `USE_MOCK_DATA` | Optional: Mock-Daten für die Energie-Ansicht |
+
+Geräte (Rolläden, Sensoren) sowie Stundenplan und Ferien sind in `src/lib/config/` hinterlegt und müssen an die eigene Installation angepasst werden.
+
+## API
+
+Das Backend stellt REST- und SSE-Endpunkte unter `src/routes/api/` bereit, u. a. für:
+
+- **Rolläden:** Befehle senden und Live-Status streamen
+- **Sensoren:** Live-Daten von Raumsensoren streamen
+- **Lüfter:** Status abfragen und Betriebsmodus ändern
+- **Heizung:** Daten der Heizungsanlage abrufen
+- **Haustür & Klingel:** geschützte Türöffnung sowie Klingelsteuerung
+- **Passkeys:** Registrierung und Verifizierung
+- **Wetter:** aufbereitete Wetterdaten
+- **Termine:** Schultermine anlegen, ändern und löschen
+- **Status:** Zustand der MQTT-Verbindung
+
+## Deployment
+
+Das Projekt wird per GitHub Actions automatisiert auf einen eigenen Server im Heimnetz ausgeliefert (über ein VPN). Der Node-Prozess wird mit PM2 betrieben.
+
+## Sicherheit
+
+- Sicherheitskritische Aktionen sind per Passkey geschützt.
+- Die App ist für den Betrieb im Heimnetz bzw. hinter einem VPN gedacht und **nicht** für den direkten Zugriff aus dem Internet.
+- Keine Zugangsdaten im Repository – nur über Umgebungsvariablen.
+
+## Lizenz
+
+[MIT](./LICENSE) © 2026 reitsoft
