@@ -185,7 +185,7 @@
 				<button
 					type="button"
 					onclick={() => onDetails?.()}
-					class="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-cream-100/10 bg-navy-950 text-cream-100/50 transition-colors hover:text-cream-100"
+					class="-mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded text-cream-100/50 transition-colors hover:text-cream-100 focus-visible:outline-2 focus-visible:outline-teal-500"
 					aria-label="Details zum Geschirrspüler öffnen"
 				>
 					<Ellipsis class="h-5 w-5 stroke-2" />
