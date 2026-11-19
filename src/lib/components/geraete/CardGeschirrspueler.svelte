@@ -5,7 +5,7 @@
 	import Sparkles from '@lucide/svelte/icons/sparkles';
 	import Snowflake from '@lucide/svelte/icons/snowflake';
 	import CircleCheck from '@lucide/svelte/icons/circle-check';
-	import ChevronUp from '@lucide/svelte/icons/chevron-up';
+	import Ellipsis from '@lucide/svelte/icons/ellipsis';
 	import DoorOpen from '@lucide/svelte/icons/door-open';
 	import DoorClosed from '@lucide/svelte/icons/door-closed';
 	import bild from '$lib/assets/geschirrspueler.svg';
@@ -185,10 +185,10 @@
 				<button
 					type="button"
 					onclick={() => onDetails?.()}
-					class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cream-100/10 bg-navy-950 text-cream-100/50 transition-colors hover:text-cream-100"
+					class="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-cream-100/10 bg-navy-950 text-cream-100/50 transition-colors hover:text-cream-100"
 					aria-label="Details zum Geschirrspüler öffnen"
 				>
-					<ChevronUp class="h-5 w-5 stroke-2" />
+					<Ellipsis class="h-5 w-5 stroke-2" />
 				</button>
 			</div>
 
