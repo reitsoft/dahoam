@@ -2,7 +2,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import CircleCheck from '@lucide/svelte/icons/circle-check';
-	import ChevronUp from '@lucide/svelte/icons/chevron-up';
+	import Ellipsis from '@lucide/svelte/icons/ellipsis';
 
 	type Status = {
 		status: 'BEREIT' | 'LAEUFT' | 'FERTIG';
@@ -82,8 +82,8 @@
 	});
 </script>
 
-<div class="flex flex-col gap-4 rounded-3xl border border-navy-800 bg-navy-900 p-4">
-	<div class="flex items-stretch gap-4">
+<div class="flex flex-col gap-2 rounded-3xl border border-navy-800 bg-navy-900 p-3">
+	<div class="flex items-stretch gap-3">
 		<img
 			src={bild}
 			alt=""
@@ -93,8 +93,8 @@
 		/>
 
 		<div class="flex min-w-0 flex-1 flex-col justify-between">
-			<div class="flex items-start justify-between gap-2">
-				<span class="pt-1.5 text-xs font-bold tracking-wide text-cream-100/50 uppercase">
+			<div class="flex items-center justify-between gap-2">
+				<span class="text-xs font-bold tracking-wide text-cream-100/50 uppercase">
 					{name}
 				</span>
 
@@ -102,17 +102,17 @@
 				<button
 					type="button"
 					onclick={() => onDetails?.()}
-					class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cream-100/10 bg-navy-950 text-cream-100/50 transition-colors hover:text-cream-100"
+					class="-mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded text-cream-100/50 transition-colors hover:text-cream-100 focus-visible:outline-2 focus-visible:outline-teal-500"
 					aria-label="Details zu {name} öffnen"
 				>
-					<ChevronUp class="h-5 w-5 stroke-2" />
+					<Ellipsis class="h-5 w-5 stroke-2" />
 				</button>
 			</div>
 
 			<div>
 				<div class="flex items-center gap-2">
 					<span
-						class="text-3xl font-bold {laeuft
+						class="text-2xl font-bold {laeuft
 							? 'text-teal-500'
 							: fertig
 								? 'text-cream-100'
@@ -121,25 +121,25 @@
 						{statusText}
 					</span>
 					{#if fertig}
-						<CircleCheck class="h-6 w-6 stroke-2 text-teal-500" aria-label="Fertig" />
+						<CircleCheck class="h-5 w-5 stroke-2 text-teal-500" aria-label="Fertig" />
 					{/if}
 				</div>
-				<div class="h-5 text-sm text-cream-100/50">{detail}</div>
+				<div class="h-4 text-xs text-cream-100/50">{detail}</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Verbrauch -->
-	<div class="grid grid-cols-2 divide-x divide-cream-100/10 rounded-2xl bg-navy-950 py-3">
-		<div class="px-4">
-			<div class="text-2xl font-bold text-cream-100">
-				{kwh(verbrauchMonat)}<span class="ml-1 text-sm font-medium text-cream-100/50">kWh</span>
+	<div class="grid grid-cols-2 divide-x divide-cream-100/10 rounded-2xl bg-navy-950 py-2">
+		<div class="px-3">
+			<div class="text-xl font-bold text-cream-100">
+				{kwh(verbrauchMonat)}<span class="ml-1 text-xs font-medium text-cream-100/50">kWh</span>
 			</div>
 			<div class="text-xs text-cream-100/50">Dieser Monat</div>
 		</div>
-		<div class="px-4">
-			<div class="text-2xl font-bold text-cream-100">
-				{kwh(verbrauchVormonat)}<span class="ml-1 text-sm font-medium text-cream-100/50">kWh</span>
+		<div class="px-3">
+			<div class="text-xl font-bold text-cream-100">
+				{kwh(verbrauchVormonat)}<span class="ml-1 text-xs font-medium text-cream-100/50">kWh</span>
 			</div>
 			<div class="text-xs text-cream-100/50">Letzter Monat</div>
 		</div>
