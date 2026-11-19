@@ -165,12 +165,12 @@
 
 <svelte:window onclick={ausserhalb} />
 
-<div class="flex flex-col gap-3 rounded-3xl border border-navy-800 bg-navy-900 p-4">
-	<div class="flex items-stretch gap-4">
+<div class="flex flex-col gap-2 rounded-3xl border border-navy-800 bg-navy-900 p-3">
+	<div class="flex items-stretch gap-3">
 		<img
 			src={bild}
 			alt=""
-			class="h-24 w-24 shrink-0 object-contain transition-opacity {laeuft || fertig
+			class="h-32 w-32 shrink-0 object-contain transition-opacity {laeuft || fertig
 				? 'opacity-100'
 				: 'opacity-60'}"
 		/>
@@ -180,7 +180,7 @@
 				<span class="text-xs font-bold tracking-wide text-cream-100/50 uppercase">
 					Geschirrspüler
 				</span>
-			
+
 				<!-- Platzhalter für den späteren BottomDrawer -->
 				<button
 					type="button"
@@ -195,7 +195,7 @@
 			<div>
 				<div class="flex items-center gap-2">
 					<span
-						class="text-3xl font-bold {laeuft
+						class="text-2xl font-bold {laeuft
 							? 'text-teal-500'
 							: fertig
 								? 'text-cream-100'
@@ -204,16 +204,16 @@
 						{statusText}
 					</span>
 					{#if fertig}
-						<CircleCheck class="h-6 w-6 stroke-2 text-teal-500" aria-label="Fertig" />
+						<CircleCheck class="h-5 w-5 stroke-2 text-teal-500" aria-label="Fertig" />
 					{/if}
 				</div>
-				<div class="h-5 text-sm text-cream-100/50">{detail}</div>
+				<div class="h-4 text-xs text-cream-100/50">{detail}</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Programm, Zustands-Icons und Fortschritt -->
-	<div class="flex flex-col gap-2 px-1">
+	<div class="flex flex-col gap-1.5 px-1">
 		<div class="flex items-center justify-between gap-3">
 			<div class="min-w-0 truncate text-sm">
 				<span class="font-bold text-cream-100">{programm}</span>
@@ -230,12 +230,12 @@
 						onclick={() => umschalten(info.key)}
 						aria-label="{info.label}: {info.status}"
 						aria-expanded={aktiv === info.key}
-						class="flex h-9 w-9 items-center justify-center rounded-full border bg-navy-950 transition-colors {aktiv ===
+						class="flex h-8 w-8 items-center justify-center rounded-full border bg-navy-950 transition-colors {aktiv ===
 						info.key
 							? 'border-cream-100/30'
 							: 'border-cream-100/10'}"
 					>
-						<Icon class="h-5 w-5 stroke-2 {TON_KLASSE[info.ton]}" />
+						<Icon class="h-4.5 w-4.5 stroke-2 {TON_KLASSE[info.ton]}" />
 					</button>
 				{/each}
 
@@ -253,7 +253,7 @@
 		</div>
 
 		<div
-			class="h-3 w-full overflow-hidden rounded-full border border-cream-100/10 bg-navy-950"
+			class="h-2.5 w-full overflow-hidden rounded-full border border-cream-100/10 bg-navy-950"
 			role="progressbar"
 			aria-valuenow={prozent}
 			aria-valuemin={0}
