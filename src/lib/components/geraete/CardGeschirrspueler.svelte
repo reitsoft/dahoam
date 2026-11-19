@@ -1,6 +1,7 @@
 <!-- src/lib/components/geraete/CardGeschirrspueler.svelte -->
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import Sparkles from '@lucide/svelte/icons/sparkles';
 	import Snowflake from '@lucide/svelte/icons/snowflake';
 	import CircleCheck from '@lucide/svelte/icons/circle-check';
@@ -9,17 +10,16 @@
 	import DoorClosed from '@lucide/svelte/icons/door-closed';
 	import bild from '$lib/assets/geschirrspueler.svg';
 
-
-type GsState = {
-	state: string | null;
-	program: string | null;
-	progress: number | null;
-	endsAt: number | null;
-	rinseAidLow: boolean;
-	saltLow: boolean;
-	doorOpen: boolean | null;
-	fertigAm: number | null;
-};
+	type GsState = {
+		state: string | null;
+		program: string | null;
+		progress: number | null;
+		endsAt: number | null;
+		rinseAidLow: boolean;
+		saltLow: boolean;
+		doorOpen: boolean | null;
+		fertigAm: number | null;
+	};
 
 	let {
 		initial,
@@ -79,6 +79,64 @@ type GsState = {
 				: ''
 	);
 
+	// --- Zustands-Icons (Klarspüler, Salz, Tür) mit Tooltip ---------------------------------
+
+	type InfoKey = 'klarspueler' | 'salz' | 'tuer';
+	type Ton = 'ok' | 'warn' | 'unbekannt';
+
+	// Teal = in Ordnung, Orange = Aufmerksamkeit nötig, gedimmt = unbekannt
+	const TON_KLASSE: Record<Ton, string> = {
+		ok: 'text-teal-500',
+		warn: 'text-orange-500',
+		unbekannt: 'text-cream-100/30'
+	};
+
+	let infos = $derived([
+		{
+			key: 'klarspueler' as InfoKey,
+			icon: Sparkles,
+			label: 'Klarspüler',
+			status: gs.rinseAidLow ? 'Fast leer' : 'Füllstand OK',
+			ton: (gs.rinseAidLow ? 'warn' : 'ok') as Ton
+		},
+		{
+			key: 'salz' as InfoKey,
+			icon: Snowflake,
+			label: 'Salz',
+			status: gs.saltLow ? 'Fast leer' : 'Füllstand OK',
+			ton: (gs.saltLow ? 'warn' : 'ok') as Ton
+		},
+		{
+			key: 'tuer' as InfoKey,
+			icon: gs.doorOpen ? DoorOpen : DoorClosed,
+			label: 'Tür',
+			status: gs.doorOpen === null ? 'Unbekannt' : gs.doorOpen ? 'Offen' : 'Geschlossen',
+			ton: (gs.doorOpen === null ? 'unbekannt' : gs.doorOpen ? 'warn' : 'ok') as Ton
+		}
+	]);
+
+	let aktiv = $state<InfoKey | null>(null);
+	let aktiveInfo = $derived(infos.find((i) => i.key === aktiv) ?? null);
+	let iconBereich: HTMLElement | undefined;
+
+	function umschalten(key: InfoKey) {
+		aktiv = aktiv === key ? null : key;
+	}
+
+	// Tippen außerhalb schließt den Tooltip
+	function ausserhalb(e: MouseEvent) {
+		if (aktiv && iconBereich && !iconBereich.contains(e.target as Node)) aktiv = null;
+	}
+
+	// Tooltip blendet sich nach 3 s selbst aus
+	$effect(() => {
+		if (!aktiv) return;
+		const id = setTimeout(() => (aktiv = null), 3000);
+		return () => clearTimeout(id);
+	});
+
+	// --- Synchronisierung -------------------------------------------------------------------
+
 	async function sync() {
 		try {
 			const res = await fetch('/api/geschirrspueler', { cache: 'no-store' });
@@ -105,12 +163,14 @@ type GsState = {
 	});
 </script>
 
-<div class="flex flex-col gap-4 rounded-3xl border border-navy-800 bg-navy-900 p-4">
+<svelte:window onclick={ausserhalb} />
+
+<div class="flex flex-col gap-3 rounded-3xl border border-navy-800 bg-navy-900 p-4">
 	<div class="flex items-stretch gap-4">
 		<img
 			src={bild}
 			alt=""
-			class="h-32 w-32 shrink-0 object-contain transition-opacity {laeuft || fertig
+			class="h-24 w-24 shrink-0 object-contain transition-opacity {laeuft || fertig
 				? 'opacity-100'
 				: 'opacity-60'}"
 		/>
@@ -152,12 +212,46 @@ type GsState = {
 		</div>
 	</div>
 
-	<!-- Programm und Fortschritt -->
+	<!-- Programm, Zustands-Icons und Fortschritt -->
 	<div class="flex flex-col gap-2 px-1">
-		<div class="flex items-center justify-between text-sm">
-			<span class="font-bold text-cream-100">{programm}</span>
-			<span class="text-cream-100/50">{laeuft || fertig ? `${prozent}%` : ''}</span>
+		<div class="flex items-center justify-between gap-3">
+			<div class="min-w-0 truncate text-sm">
+				<span class="font-bold text-cream-100">{programm}</span>
+				{#if programm && (laeuft || fertig)}
+					<span class="text-cream-100/50"> · {prozent}%</span>
+				{/if}
+			</div>
+
+			<div class="relative flex shrink-0 gap-2" bind:this={iconBereich}>
+				{#each infos as info (info.key)}
+					{@const Icon = info.icon}
+					<button
+						type="button"
+						onclick={() => umschalten(info.key)}
+						aria-label="{info.label}: {info.status}"
+						aria-expanded={aktiv === info.key}
+						class="flex h-9 w-9 items-center justify-center rounded-full border bg-navy-950 transition-colors {aktiv ===
+						info.key
+							? 'border-cream-100/30'
+							: 'border-cream-100/10'}"
+					>
+						<Icon class="h-5 w-5 stroke-2 {TON_KLASSE[info.ton]}" />
+					</button>
+				{/each}
+
+				{#if aktiveInfo}
+					<div
+						transition:fade={{ duration: 120 }}
+						role="status"
+						class="absolute right-0 bottom-full z-10 mb-2 rounded-xl border border-cream-100/10 bg-navy-950 px-3 py-1.5 text-xs whitespace-nowrap shadow-lg"
+					>
+						<span class="font-bold text-cream-100">{aktiveInfo.label}:</span>
+						<span class={TON_KLASSE[aktiveInfo.ton]}>{aktiveInfo.status}</span>
+					</div>
+				{/if}
+			</div>
 		</div>
+
 		<div
 			class="h-3 w-full overflow-hidden rounded-full border border-cream-100/10 bg-navy-950"
 			role="progressbar"
@@ -172,37 +266,4 @@ type GsState = {
 			></div>
 		</div>
 	</div>
-
-	<!-- Klarspüler, Salz, Tür -->
-	<div class="grid grid-cols-3 divide-x divide-cream-100/10 rounded-2xl bg-navy-950 py-3">
-	<div class="flex flex-col items-center gap-1 px-2 text-center">
-		<Sparkles
-			class="h-5 w-5 stroke-2 {gs.rinseAidLow ? 'text-orange-500' : 'text-cream-100/30'}"
-		/>
-		<div class="text-sm font-bold {gs.rinseAidLow ? 'text-orange-500' : 'text-cream-100'}">
-			{gs.rinseAidLow ? 'Fast leer' : 'OK'}
-		</div>
-		<div class="text-xs text-cream-100/50">Klarspüler</div>
-	</div>
-
-	<div class="flex flex-col items-center gap-1 px-2 text-center">
-		<Snowflake class="h-5 w-5 stroke-2 {gs.saltLow ? 'text-orange-500' : 'text-cream-100/30'}" />
-		<div class="text-sm font-bold {gs.saltLow ? 'text-orange-500' : 'text-cream-100'}">
-			{gs.saltLow ? 'Fast leer' : 'OK'}
-		</div>
-		<div class="text-xs text-cream-100/50">Salz</div>
-	</div>
-
-	<div class="flex flex-col items-center gap-1 px-2 text-center">
-		{#if gs.doorOpen}
-			<DoorOpen class="h-5 w-5 stroke-2 text-cream-100" />
-		{:else}
-			<DoorClosed class="h-5 w-5 stroke-2 text-cream-100/30" />
-		{/if}
-		<div class="text-sm font-bold {gs.doorOpen === null ? 'text-cream-100/40' : 'text-cream-100'}">
-			{gs.doorOpen === null ? '–' : gs.doorOpen ? 'Offen' : 'Zu'}
-		</div>
-		<div class="text-xs text-cream-100/50">Tür</div>
-	</div>
-</div>
 </div>
