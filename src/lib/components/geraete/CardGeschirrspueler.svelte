@@ -46,7 +46,7 @@
 		PreRinse: 'Vorspülen',
 		MachineCare: 'Maschinenpflege',
 		Kurz60: 'Kurz 60°',
-		'001': 'Standardprogramm' // <- ggf. durch den echten Programmnamen ersetzen
+		'001': 'Auto 45-65°'
 	};
 
 	const STATUS: Record<string, string> = {
