@@ -1,98 +1,60 @@
 /**
- * SMA Sunny Home Manager 2.0 – Datenzugriff auf InfluxDB
+ * SMA Sunny Home Manager 2.0 – Datenzugriff auf InfluxDB (nur Netzbezug / Einspeisung)
  *
  * Ablegen unter: src/lib/server/smaHomeManager.ts
  *
  * Datenquelle (Measurement `sma_netz`, Feld `value`, Tag `metric`):
  *   sma_raw  (48 h)     Rohdaten, ca. 1 Wert/s
- *   sma_15m  (14 Tage)  15-Minuten-Werte
- *   sma_1h   (90 Tage)  Stundenwerte
  *   sma_1d   (2 Jahre)  Tageswerte
  *   sma_1mo  (5 Jahre)  Monatswerte
- *   sma_1y   (unbegr.)  Jahreswerte
  *
- * Aggregierte Buckets: Leistungen (W) = Mittelwert, Zählerstände (kWh) = letzter Wert.
- * Der Zeitstempel ist der BEGINN der Periode (Tage/Monate/Jahre in Europe/Berlin).
- * Ein Zählerstand in einem aggregierten Bucket ist der Stand am ENDE der Periode.
+ * Zählerstände (kWh) sind in aggregierten Buckets der LETZTE Wert der Periode.
+ * Der Zeitstempel ist der BEGINN der Periode (Tage/Monate in Europe/Berlin).
  *
  * Der InfluxDB-Client kommt aus ./influxClient (INFLUX_URL, INFLUX_TOKEN, INFLUX_ORG).
  */
 import { queryApi } from './influxClient';
 
 /* ------------------------------------------------------------------ */
-/* Typen                                                               */
+/* Typen und Konstanten                                                */
 /* ------------------------------------------------------------------ */
-
-/** Leistungen in W. Vorzeichen bei l*_w und total_w: positiv = Einspeisung, negativ = Bezug. */
-export const POWER_METRICS = [
-	'total_w',
-	'total_w_buy',
-	'total_w_sell',
-	'l1_w',
-	'l1_w_buy',
-	'l1_w_sell',
-	'l2_w',
-	'l2_w_buy',
-	'l2_w_sell',
-	'l3_w',
-	'l3_w_buy',
-	'l3_w_sell'
-] as const;
 
 /** Zählerstände in kWh (aufsummiert). */
-export const ENERGY_METRICS = ['kwh_buy', 'kwh_sell'] as const;
+const ENERGY_METRICS = ['kwh_buy', 'kwh_sell'] as const;
+type EnergyMetric = (typeof ENERGY_METRICS)[number];
+type Resolution = 'raw' | '1d' | '1mo';
+type AggregatedResolution = Exclude<Resolution, 'raw'>;
+type SmaValues = Partial<Record<EnergyMetric, number>>;
+type SmaPoint = { time: Date; values: SmaValues };
+type EnergyPoint = { time: Date; kwhBuy: number; kwhSell: number };
 
-export const ALL_METRICS = [...POWER_METRICS, ...ENERGY_METRICS] as const;
-
-export type PowerMetric = (typeof POWER_METRICS)[number];
-export type EnergyMetric = (typeof ENERGY_METRICS)[number];
-export type SmaMetric = PowerMetric | EnergyMetric;
-
-export type Resolution = 'raw' | '15m' | '1h' | '1d' | '1mo' | '1y';
-export type AggregatedResolution = Exclude<Resolution, 'raw'>;
-
-export type SmaValues = Partial<Record<SmaMetric, number>>;
-export type SmaPoint = { time: Date; values: SmaValues };
-export type SmaCurrent = { time: Date | null; ageSeconds: number | null; values: SmaValues };
-export type SmaSeries = { resolution: Resolution; points: SmaPoint[] };
-export type EnergyPoint = { time: Date; kwhBuy: number; kwhSell: number };
-
-/* ------------------------------------------------------------------ */
-/* Konstanten                                                          */
-/* ------------------------------------------------------------------ */
+export type TagesVerbrauch = {
+	/** Tag im Monat (1–31) */
+	tag: number;
+	/** Netzbezug in kWh, null = keine Daten */
+	netzbezug: number | null;
+	/** Einspeisung in kWh, null = keine Daten */
+	einspeisung: number | null;
+	/**
+	 * PV-Anteil am Verbrauch (Eigenverbrauch) in kWh.
+	 * Bleibt null, bis die PV-Erzeugung vom Wechselrichter in InfluxDB steht
+	 * (Eigenverbrauch = Erzeugung − Einspeisung).
+	 */
+	pv: number | null;
+};
 
 const H = 3_600_000;
 const D = 24 * H;
-
 const BUCKETS: Record<Resolution, string> = {
 	raw: 'sma_raw',
-	'15m': 'sma_15m',
-	'1h': 'sma_1h',
 	'1d': 'sma_1d',
-	'1mo': 'sma_1mo',
-	'1y': 'sma_1y'
+	'1mo': 'sma_1mo'
 };
-
-/** Aufbewahrungsdauer je Bucket (muss zu den Buckets in InfluxDB passen). */
-const RETENTION_MS: Record<Resolution, number> = {
-	raw: 48 * H,
-	'15m': 14 * D,
-	'1h': 90 * D,
-	'1d': 730 * D,
-	'1mo': 1825 * D,
-	'1y': Number.POSITIVE_INFINITY
-};
-
 /** Zusätzlicher Vorlauf, damit difference() für die erste Periode einen Vorgängerwert hat. */
 const PAD_MS: Record<AggregatedResolution, number> = {
-	'15m': 30 * 60_000,
-	'1h': 2 * H,
 	'1d': 2 * D,
-	'1mo': 62 * D,
-	'1y': 800 * D
+	'1mo': 62 * D
 };
-
-const RESOLUTION_ORDER: Resolution[] = ['raw', '15m', '1h', '1d', '1mo', '1y'];
 
 /* ------------------------------------------------------------------ */
 /* Hilfsfunktionen                                                     */
@@ -100,15 +62,14 @@ const RESOLUTION_ORDER: Resolution[] = ['raw', '15m', '1h', '1d', '1mo', '1y'];
 
 type Row = { _time: string; metric: string; _value: number };
 
-const isMetric = (m: string): m is SmaMetric => (ALL_METRICS as readonly string[]).includes(m);
-const isPower = (m: SmaMetric): m is PowerMetric => (POWER_METRICS as readonly string[]).includes(m);
-const isEnergy = (m: SmaMetric): m is EnergyMetric => (ENERGY_METRICS as readonly string[]).includes(m);
-
+const isMetric = (m: string): m is EnergyMetric => (ENERGY_METRICS as readonly string[]).includes(m);
 const iso = (d: Date) => d.toISOString();
+const round2 = (v: number) => Math.round(v * 100) / 100;
+const summe = (tage: TagesVerbrauch[]) => round2(tage.reduce((s, t) => s + (t.netzbezug ?? 0), 0));
 
 /** Gemeinsamer Filter: Measurement, Feld, Metrik-Whitelist (als == / or, damit er in InfluxDB vorgezogen wird). */
-function baseFilter(metrics: readonly SmaMetric[]): string {
-	const alt = metrics.map((m) => `r.metric == "${m}"`).join(' or ');
+function energyFilter(): string {
+	const alt = ENERGY_METRICS.map((m) => `r.metric == "${m}"`).join(' or ');
 	return `|> filter(fn: (r) => r._measurement == "sma_netz" and r._field == "value" and (${alt}))`;
 }
 
@@ -133,12 +94,11 @@ function pivot(rows: Row[]): SmaPoint[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Zeit-Helfer (Server-Zeitzone, sollte Europe/Berlin sein)            */
+/* Zeit-Helfer (Europe/Berlin)                                         */
 /* ------------------------------------------------------------------ */
 
-const BERLIN = 'Europe/Berlin';
 const berlinFmt = new Intl.DateTimeFormat('en-US', {
-	timeZone: BERLIN,
+	timeZone: 'Europe/Berlin',
 	year: 'numeric',
 	month: 'numeric',
 	day: 'numeric',
@@ -148,7 +108,7 @@ const berlinFmt = new Intl.DateTimeFormat('en-US', {
 	hourCycle: 'h23'
 });
 
-export function berlinParts(d = new Date()) {
+function berlinParts(d = new Date()) {
 	const p = Object.fromEntries(
 		berlinFmt
 			.formatToParts(d)
@@ -159,142 +119,24 @@ export function berlinParts(d = new Date()) {
 }
 
 /** Berliner Mitternacht (Monat 1–12, über 0/13 wird korrekt umgebrochen) als echter Zeitpunkt. */
-export function berlinMitternacht(jahr: number, monat: number, tag = 1): Date {
+function berlinMitternacht(jahr: number, monat: number, tag = 1): Date {
 	const utcGuess = Date.UTC(jahr, monat - 1, tag);
 	const b = berlinParts(new Date(utcGuess));
 	const offset = Date.UTC(b.jahr, b.monat - 1, b.tag, b.stunde, b.minute, b.sekunde) - utcGuess;
 	return new Date(utcGuess - offset);
 }
 
-export const startOfDay = (d = new Date()) => {
+const startOfDay = (d = new Date()) => {
 	const b = berlinParts(d);
 	return berlinMitternacht(b.jahr, b.monat, b.tag);
 };
-export const startOfMonth = (d = new Date()) => {
+const startOfMonth = (d = new Date()) => {
 	const b = berlinParts(d);
 	return berlinMitternacht(b.jahr, b.monat, 1);
 };
-export const startOfYear = (d = new Date()) => {
-	const b = berlinParts(d);
-	return berlinMitternacht(b.jahr, 1, 1);
-};
 
 /* ------------------------------------------------------------------ */
-/* Auflösung automatisch wählen                                        */
-/* ------------------------------------------------------------------ */
-
-/**
- * Wählt anhand von Zeitspanne und Alter den passenden Bucket.
- * Reicht die Aufbewahrungsdauer nicht, wird die nächst gröbere Auflösung genommen.
- */
-export function autoResolution(start: Date, stop: Date = new Date()): Resolution {
-	const span = stop.getTime() - start.getTime();
-	const age = Date.now() - start.getTime();
-
-	const wanted: Resolution =
-		span <= 6 * H
-			? 'raw'
-			: span <= 3 * D
-				? '15m'
-				: span <= 31 * D
-					? '1h'
-					: span <= 366 * D
-						? '1d'
-						: span <= 5 * 366 * D
-							? '1mo'
-							: '1y';
-
-	for (let i = RESOLUTION_ORDER.indexOf(wanted); i < RESOLUTION_ORDER.length; i++) {
-		if (age <= RETENTION_MS[RESOLUTION_ORDER[i]]) return RESOLUTION_ORDER[i];
-	}
-	return '1y';
-}
-
-/* ------------------------------------------------------------------ */
-/* 1. Aktuelle Werte                                                   */
-/* ------------------------------------------------------------------ */
-
-/**
- * Neuester Wert jeder Metrik aus den letzten 5 Minuten.
- * `ageSeconds` zeigt das Alter des neuesten Werts – ist es groß, läuft sma2mqtt nicht.
- */
-export async function getCurrent(): Promise<SmaCurrent> {
-	const flux = `from(bucket: "${BUCKETS.raw}")
-  |> range(start: -5m)
-  ${baseFilter(ALL_METRICS)}
-  |> last()
-  |> keep(columns: ["_time", "metric", "_value"])`;
-
-	const rows = await runRows(flux);
-
-	const values: SmaValues = {};
-	let newest = 0;
-	for (const r of rows) {
-		if (!isMetric(r.metric)) continue;
-		values[r.metric] = r._value;
-		newest = Math.max(newest, new Date(r._time).getTime());
-	}
-
-	return {
-		time: newest ? new Date(newest) : null,
-		ageSeconds: newest ? Math.round((Date.now() - newest) / 1000) : null,
-		values
-	};
-}
-
-/* ------------------------------------------------------------------ */
-/* 2. Zeitreihen                                                       */
-/* ------------------------------------------------------------------ */
-
-export type SeriesOptions = {
-	start: Date;
-	stop?: Date;
-	/** Standard: alle Metriken */
-	metrics?: readonly SmaMetric[];
-	/** Standard: automatisch nach Zeitspanne und Alter */
-	resolution?: Resolution;
-	/** Nur bei `raw`: Fenstergröße zum Glätten, z. B. "10s", "1m". Standard "10s". */
-	every?: string;
-};
-
-/**
- * Zeitreihe der gewählten Metriken. Leistungen und Zählerstände werden getrennt
- * abgefragt (Mittelwert bzw. letzter Wert) und je Zeitstempel zusammengeführt.
- */
-export async function getSeries(opts: SeriesOptions): Promise<SmaSeries> {
-	const stop = opts.stop ?? new Date();
-	const resolution = opts.resolution ?? autoResolution(opts.start, stop);
-	const metrics = (opts.metrics ?? ALL_METRICS).filter(isMetric);
-
-	const every =
-		resolution === 'raw'
-			? opts.every && /^\d+(s|m|h)$/.test(opts.every)
-				? opts.every
-				: '10s'
-			: null;
-
-	const build = (ms: SmaMetric[], fn: 'mean' | 'last'): string | null => {
-		if (ms.length === 0) return null;
-		const agg = every
-			? `|> aggregateWindow(every: ${every}, fn: ${fn}, timeSrc: "_start", createEmpty: false)`
-			: '';
-		return `from(bucket: "${BUCKETS[resolution]}")
-  |> range(start: ${iso(opts.start)}, stop: ${iso(stop)})
-  ${baseFilter(ms)}
-  ${agg}
-  |> keep(columns: ["_time", "metric", "_value"])`;
-	};
-
-	const queries = [build(metrics.filter(isPower), 'mean'), build(metrics.filter(isEnergy), 'last')]
-		.filter((q): q is string => q !== null)
-		.map(runRows);
-
-	const rows = (await Promise.all(queries)).flat();
-	return { resolution, points: pivot(rows) };
-}
-
-/* ------------------------------------------------------------------ */
-/* 3. Energie je Periode (Bezug / Einspeisung in kWh)                  */
+/* Energie je Periode (Bezug / Einspeisung in kWh)                     */
 /* ------------------------------------------------------------------ */
 
 /**
@@ -302,25 +144,22 @@ export async function getSeries(opts: SeriesOptions): Promise<SmaSeries> {
  * Zählerstände. Der Zeitstempel ist der Periodenbeginn.
  *
  *   getEnergy('1d', startOfMonth())   → Tageswerte des laufenden Monats
- *   getEnergy('1mo', startOfYear())   → Monatswerte des laufenden Jahres
- *   getEnergy('1h', startOfDay())     → Stundenwerte von heute
+ *   getEnergy('1mo', Jahresbeginn)    → Monatswerte des Jahres
  *
  * Die laufende, noch unvollständige Periode enthält den Verbrauch bis zum letzten Task-Lauf.
  */
-export async function getEnergy(
+async function getEnergy(
 	resolution: AggregatedResolution,
 	start: Date,
 	stop: Date = new Date()
 ): Promise<EnergyPoint[]> {
 	const padded = new Date(start.getTime() - PAD_MS[resolution]);
-
 	const flux = `from(bucket: "${BUCKETS[resolution]}")
   |> range(start: ${iso(padded)}, stop: ${iso(stop)})
-  ${baseFilter(ENERGY_METRICS)}
+  ${energyFilter()}
   |> difference(nonNegative: true)
   |> filter(fn: (r) => r._time >= ${iso(start)})
   |> keep(columns: ["_time", "metric", "_value"])`;
-
 	const points = pivot(await runRows(flux));
 	return points.map((p) => ({
 		time: p.time,
@@ -329,8 +168,8 @@ export async function getEnergy(
 	}));
 }
 
-/** Summe von Bezug und Einspeisung über einen Zeitraum (z. B. "heute", "dieser Monat"). */
-export async function getEnergyTotal(
+/** Summe von Bezug und Einspeisung über einen Zeitraum. */
+async function getEnergyTotal(
 	resolution: AggregatedResolution,
 	start: Date,
 	stop: Date = new Date()
@@ -342,75 +181,28 @@ export async function getEnergyTotal(
 	);
 }
 
-/* ------------------------------------------------------------------ */
-/* 4. Bequeme Wrapper                                                  */
-/* ------------------------------------------------------------------ */
-
-/** Leistungsverlauf von heute (Gesamt + je Phase), automatisch geglättet. */
-export const getTodayPower = () =>
-	getSeries({
-		start: startOfDay(),
-		metrics: ['total_w', 'l1_w', 'l2_w', 'l3_w']
-	});
-
-/** Bezug/Einspeisung heute, diesen Monat, dieses Jahr in kWh. */
-export async function getEnergySummary() {
-	const [today, month, year] = await Promise.all([
-		getEnergyTotal('1h', startOfDay()),
-		getEnergyTotal('1d', startOfMonth()),
-		getEnergyTotal('1mo', startOfYear())
-	]);
-	return { today, month, year };
-}
-
-/* ------------------------------------------------------------------ */
-/* 5. Monatsübersicht für die Verbrauchs-Card                          */
-/* ------------------------------------------------------------------ */
-
-export type TagesVerbrauch = {
-	/** Tag im Monat (1–31) */
-	tag: number;
-	/** Netzbezug in kWh, null = keine Daten */
-	netzbezug: number | null;
-	/** Einspeisung in kWh, null = keine Daten */
-	einspeisung: number | null;
-	/**
-	 * PV-Anteil am Verbrauch (Eigenverbrauch) in kWh.
-	 * Bleibt null, bis die PV-Erzeugung vom Wechselrichter in InfluxDB steht
-	 * (Eigenverbrauch = Erzeugung − Einspeisung).
-	 */
-	pv: number | null;
-};
-
-const round2 = (v: number) => Math.round(v * 100) / 100;
-
-	/** Bezug/Einspeisung seit Berliner Mitternacht: aktueller Stand (raw) − Endstand gestern (1d). */
+/** Bezug/Einspeisung seit Berliner Mitternacht: aktueller Stand (raw) − Endstand gestern (1d). */
 async function getHeuteLive(): Promise<{ kwhBuy: number; kwhSell: number } | null> {
 	const heute = startOfDay();
-
 	const gesternFlux = `from(bucket: "${BUCKETS['1d']}")
   |> range(start: ${iso(new Date(heute.getTime() - 36 * H))}, stop: ${iso(heute)})
-  ${baseFilter(ENERGY_METRICS)}
+  ${energyFilter()}
   |> last()
   |> keep(columns: ["_time", "metric", "_value"])`;
-
 	// 2 Tage Vorlauf: kwh_sell wird nachts u. U. nur selten geschrieben
 	const jetztFlux = `from(bucket: "${BUCKETS.raw}")
   |> range(start: -2d)
-  ${baseFilter(ENERGY_METRICS)}
+  ${energyFilter()}
   |> last()
   |> keep(columns: ["_time", "metric", "_value"])`;
-
 	const [g, j] = await Promise.all([
 		runRows(gesternFlux).then(pivot),
 		runRows(jetztFlux).then(pivot)
 	]);
-
 	// kwh_buy und kwh_sell haben bei last() unterschiedliche Zeitstempel, daher zusammenführen
 	const merge = (pts: SmaPoint[]) => Object.assign({}, ...pts.map((p) => p.values)) as SmaValues;
 	const gest = merge(g);
 	const jetzt = merge(j);
-
 	if (
 		gest.kwh_buy === undefined ||
 		gest.kwh_sell === undefined ||
@@ -418,34 +210,30 @@ async function getHeuteLive(): Promise<{ kwhBuy: number; kwhSell: number } | nul
 		jetzt.kwh_sell === undefined
 	)
 		return null;
-
 	return {
 		kwhBuy: Math.max(0, jetzt.kwh_buy - gest.kwh_buy),
 		kwhSell: Math.max(0, jetzt.kwh_sell - gest.kwh_sell)
 	};
 }
 
-
 /**
- * Tageswerte des Monats (Standard: laufender Monat) plus Netzbezug des Vormonats.
- * Der erste Tag mit Daten fehlt, weil für die Differenz ein Vorgänger-Zählerstand nötig ist.
+ * Tageswerte eines Monats. Der laufende Tag wird mit dem Live-Wert überschrieben
+ * (der 1d-Punkt wird nicht laufend aktualisiert). Der erste Tag mit Daten fehlt,
+ * weil für die Differenz ein Vorgänger-Zählerstand nötig ist.
  */
-export async function getMonatsVerbrauch(
-	monatStart: Date = startOfMonth()
-): Promise<{ tage: TagesVerbrauch[]; vormonatNetzbezug: number }> {
+async function ladeTage(monatStart: Date): Promise<TagesVerbrauch[]> {
 	const { jahr, monat } = berlinParts(monatStart);
 	const naechsterMonat = berlinMitternacht(jahr, monat + 1);
-	const vormonatStart = berlinMitternacht(jahr, monat - 1);
 	const tageImMonat = new Date(Date.UTC(jahr, monat, 0)).getUTCDate();
+	const jetzt = berlinParts();
+	const istLaufend = jetzt.jahr === jahr && jetzt.monat === monat;
 
-	const [tagesPunkte, vormonat, live] = await Promise.all([
+	const [tagesPunkte, live] = await Promise.all([
 		getEnergy('1d', monatStart, naechsterMonat),
-		getEnergyTotal('1mo', vormonatStart, monatStart),
-		getHeuteLive()
+		istLaufend ? getHeuteLive() : Promise.resolve(null)
 	]);
 
 	const proTag = new Map(tagesPunkte.map((p) => [berlinParts(p.time).tag, p]));
-
 	const tage = Array.from({ length: tageImMonat }, (_, i): TagesVerbrauch => {
 		const p = proTag.get(i + 1);
 		return {
@@ -455,14 +243,62 @@ export async function getMonatsVerbrauch(
 			pv: null
 		};
 	});
-
-	// Laufenden Tag mit dem Live-Wert überschreiben (der 1d-Punkt wird nicht laufend aktualisiert)
-	const jetzt = berlinParts();
-	if (live && jetzt.jahr === jahr && jetzt.monat === monat) {
+	if (live) {
 		const heute = tage[jetzt.tag - 1];
 		heute.netzbezug = round2(live.kwhBuy);
 		heute.einspeisung = round2(live.kwhSell);
 	}
+	return tage;
+}
 
+/* ------------------------------------------------------------------ */
+/* Öffentliche API                                                     */
+/* ------------------------------------------------------------------ */
+
+/** Tageswerte des Monats (Standard: laufender Monat) plus Netzbezug des Vormonats. */
+export async function getMonatsVerbrauch(
+	monatStart: Date = startOfMonth()
+): Promise<{ tage: TagesVerbrauch[]; vormonatNetzbezug: number }> {
+	const { jahr, monat } = berlinParts(monatStart);
+	const vormonatStart = berlinMitternacht(jahr, monat - 1);
+	const [tage, vormonat] = await Promise.all([
+		ladeTage(monatStart),
+		getEnergyTotal('1mo', vormonatStart, monatStart)
+	]);
 	return { tage, vormonatNetzbezug: round2(vormonat.kwhBuy) };
+}
+
+/** Netzbezug heute und im laufenden Monat in kWh (null = keine Daten für heute). */
+export async function getNetzbezugHeuteUndMonat(): Promise<{
+	heute: number | null;
+	monat: number;
+}> {
+	const tage = await ladeTage(startOfMonth());
+	return { heute: tage[berlinParts().tag - 1].netzbezug, monat: summe(tage) };
+}
+
+/**
+ * Netzbezug je Monat eines Jahres (12 Werte, Jan–Dez) in kWh.
+ * null = Monat liegt in der Zukunft. Der laufende Monat wird aus den Tageswerten
+ * inkl. Live-Wert gebildet, weil der 1mo-Punkt nicht laufend aktualisiert wird.
+ */
+export async function getNetzbezugProMonatJahr(
+	jahr: number = berlinParts().jahr
+): Promise<(number | null)[]> {
+	const jetzt = berlinParts();
+	if (jahr > jetzt.jahr) return Array(12).fill(null);
+
+	const istLaufendesJahr = jahr === jetzt.jahr;
+	const [monatsPunkte, laufenderMonat] = await Promise.all([
+		getEnergy('1mo', berlinMitternacht(jahr, 1), berlinMitternacht(jahr + 1, 1)),
+		istLaufendesJahr ? ladeTage(berlinMitternacht(jahr, jetzt.monat)) : Promise.resolve(null)
+	]);
+
+	const proMonat = new Map(monatsPunkte.map((p) => [berlinParts(p.time).monat, p.kwhBuy]));
+	return Array.from({ length: 12 }, (_, i) => {
+		const m = i + 1;
+		if (istLaufendesJahr && m > jetzt.monat) return null;
+		if (istLaufendesJahr && m === jetzt.monat && laufenderMonat) return summe(laufenderMonat);
+		return round2(proMonat.get(m) ?? 0);
+	});
 }
