@@ -192,7 +192,7 @@
 						: fertig
 							? 'opacity-20'
 							: 'opacity-0'}"
-					style="background: radial-gradient(circle, rgba(20, 184, 166, 0.28) 0%, rgba(20, 184, 166, 0.1) 50%, transparent 75%); filter: blur(14px);"
+					style="background: radial-gradient(circle, rgba(20, 184, 166, 0.36) 0%, rgba(20, 184, 166, 0.14) 50%, transparent 75%); filter: blur(16px);"
 				></div>
 
 				<img
