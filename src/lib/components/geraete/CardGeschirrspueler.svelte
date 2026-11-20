@@ -45,7 +45,8 @@
 		NightWash: 'Leise',
 		PreRinse: 'Vorspülen',
 		MachineCare: 'Maschinenpflege',
-		Kurz60: 'Kurz 60°'
+		Kurz60: 'Kurz 60°',
+		'001': 'Standardprogramm' // <- ggf. durch den echten Programmnamen ersetzen
 	};
 
 	const STATUS: Record<string, string> = {
