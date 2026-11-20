@@ -21,7 +21,7 @@ function alter(pfad: string): number | null {
 	return e ? Math.round((Date.now() - e.zeit) / 1000) : null;
 }
 
-function getEbusData() {
+export function getEbusData() {
 	const status = val('hmu/RunDataStatuscode');
 	const drehzahl = val('hmu/RunDataCompressorSpeed');
 
