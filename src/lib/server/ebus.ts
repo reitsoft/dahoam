@@ -2,8 +2,6 @@ import { ebusStates, mqttClient } from './mqtt';
 
 type Wert = string | number | null;
 
-// {"temp": {"value": 30}} -> val('hmu/Status01', 'temp') = 30
-// Einzelwerte: {"value": {"value": 44.9}} -> val('hmu/RunDataCompressorSpeed') = 44.9
 function val(pfad: string, feld = 'value'): Wert {
 	return (ebusStates.get(pfad)?.data?.[feld]?.value as Wert | undefined) ?? null;
 }
@@ -23,7 +21,7 @@ function alter(pfad: string): number | null {
 	return e ? Math.round((Date.now() - e.zeit) / 1000) : null;
 }
 
-export function getEbusData() {
+function getEbusData() {
 	const status = val('hmu/RunDataStatuscode');
 	const drehzahl = val('hmu/RunDataCompressorSpeed');
 
@@ -99,16 +97,6 @@ export function getEbusData() {
 			raumtemperatur: alter('ctlv3/Z1RoomTemp')
 		}
 	};
-}
-
-// Alle empfangenen Rohdaten mit Zeitstempel (zum Entdecken weiterer Datenpunkte)
-export function getEbusRaw() {
-	return Object.fromEntries(
-		[...ebusStates].map(([pfad, e]) => [
-			pfad,
-			{ zeit: new Date(e.zeit).toISOString(), daten: e.data }
-		])
-	);
 }
 
 const num = (x: Wert): number | null => (typeof x === 'number' ? x : null);
