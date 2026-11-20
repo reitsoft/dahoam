@@ -178,28 +178,28 @@
 		></div>
 	{/if}
 
-	<!-- Innere Karte -->
+	<!-- Statische innere Kartenfläche -->
 	<article
-		class="relative z-10 flex flex-col gap-3 overflow-hidden rounded-[calc(1.5rem-1px)] bg-gradient-to-b from-navy-800/70 via-navy-900 to-navy-950/90 p-3.5"
+		class="relative z-10 flex flex-col gap-3 overflow-hidden rounded-[calc(1.5rem-1px)] bg-navy-900 p-3.5"
 	>
 		<div class="flex items-center gap-3.5">
-			<!-- Bild ohne Rahmen, nur pulsierender Glow im Lauf-Zustand -->
+			<!-- Bild mit dezentem pulsierendem Glow im Lauf-Zustand -->
 			<div class="relative flex h-32 w-32 shrink-0 items-center justify-center">
 				<div
 					aria-hidden="true"
-					class="pointer-events-none absolute -inset-2 rounded-full transition-opacity duration-500 {laeuft
+					class="pointer-events-none absolute inset-1 rounded-full transition-opacity duration-500 {laeuft
 						? 'glow-pulse opacity-100'
 						: fertig
-							? 'opacity-40'
+							? 'opacity-20'
 							: 'opacity-0'}"
-					style="background: radial-gradient(circle, rgba(20, 184, 166, 0.52) 0%, rgba(20, 184, 166, 0.22) 48%, transparent 75%); filter: blur(16px);"
+					style="background: radial-gradient(circle, rgba(20, 184, 166, 0.28) 0%, rgba(20, 184, 166, 0.1) 50%, transparent 75%); filter: blur(14px);"
 				></div>
 
 				<img
 					src={bild}
 					alt=""
 					class="relative z-10 h-30 w-30 object-contain transition-all duration-300 {laeuft
-						? 'scale-[1.03] opacity-100 drop-shadow-[0_0_18px_rgba(20,184,166,0.42)]'
+						? 'scale-[1.02] opacity-100 drop-shadow-[0_0_10px_rgba(20,184,166,0.22)]'
 						: fertig
 							? 'opacity-100'
 							: 'opacity-55'}"
@@ -304,12 +304,12 @@
 	@keyframes glowPulse {
 		0%,
 		100% {
-			transform: scale(0.92);
-			opacity: 0.6;
+			transform: scale(0.94);
+			opacity: 0.45;
 		}
 		50% {
-			transform: scale(1.16);
-			opacity: 1;
+			transform: scale(1.08);
+			opacity: 0.78;
 		}
 	}
 
