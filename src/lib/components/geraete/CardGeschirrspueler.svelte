@@ -305,11 +305,11 @@
 		0%,
 		100% {
 			transform: scale(0.94);
-			opacity: 0.45;
+			opacity: 0.4;
 		}
 		50% {
-			transform: scale(1.08);
-			opacity: 0.78;
+			transform: scale(1.11);
+			opacity: 0.82;
 		}
 	}
 
