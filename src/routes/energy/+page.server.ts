@@ -3,7 +3,7 @@ import {
 	getAktuellerZaehlerstand,
 	getVerbrauchMonat,
 	getVerbrauchProMonatJahr
-} from '$lib/server/stromzaehler.index';
+} from '$lib/server/stromzaehler';
 import { getMonatsVerbrauch } from '$lib/server/smaHomeManager';
 
 export const load = async () => {
