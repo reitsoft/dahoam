@@ -33,12 +33,13 @@
 		</div>
 
 		<div class="min-w-0 flex-1">
-			<!-- Titel oberhalb des Zählwerks -->
+			<!-- Titel oberhalb des Zählwerks 
 			<div class="mb-1.5">
 				<span class="text-sm font-medium tracking-wide text-cream-100/60 uppercase">
 					Zählerstand
 				</span>
 			</div>
+			-->
 
 			<!-- Mechanisches Rollenzählwerk -->
 			<div
