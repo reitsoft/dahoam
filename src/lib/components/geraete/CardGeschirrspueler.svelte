@@ -164,31 +164,32 @@
 
 <article
 	class="relative flex flex-col gap-3 overflow-hidden rounded-3xl border bg-gradient-to-b from-navy-800/70 via-navy-900 to-navy-950/90 p-3.5 shadow-xl shadow-black/25 transition-colors duration-300 {laeuft
-		? 'border-teal-500/30'
+		? 'border-teal-500/35'
 		: fertig
 			? 'border-cream-100/15'
 			: 'border-navy-800'}"
 >
-	<!-- Dezenter oberer Lichtstreifen bei aktivem Betrieb -->
+	<!-- Rotierender Hintergrund-Gradient bei aktivem Betrieb -->
 	{#if laeuft}
 		<div
 			aria-hidden="true"
-			class="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-teal-400/70 to-transparent"
+			class="pointer-events-none absolute -inset-1/2 opacity-35 blur-2xl gradient-spin"
+			style="background: conic-gradient(from 0deg, transparent 0deg, rgba(20, 184, 166, 0.45) 75deg, rgba(45, 212, 191, 0.15) 150deg, transparent 230deg, rgba(20, 184, 166, 0.3) 305deg, transparent 360deg);"
 		></div>
 	{/if}
 
-	<div class="flex items-center gap-3.5">
-		<!-- Bild ohne Rahmen, nur pulsierender Glow im Lauf-Zustand -->
+	<div class="relative z-10 flex items-center gap-3.5">
+		<!-- Bild ohne Rahmen, nur pulsierender & rotierender Glow im Lauf-Zustand -->
 		<div class="relative flex h-32 w-32 shrink-0 items-center justify-center">
-			<!-- Kräftigerer pulsierender Glow -->
+			<!-- Rotierender + pulsierender Glow -->
 			<div
 				aria-hidden="true"
-				class="pointer-events-none absolute -inset-2 rounded-full transition-opacity duration-500 {laeuft
-					? 'glow-pulse opacity-100'
+				class="pointer-events-none absolute -inset-3 rounded-full transition-opacity duration-500 {laeuft
+					? 'glow-spin opacity-100'
 					: fertig
 						? 'opacity-40'
 						: 'opacity-0'}"
-				style="background: radial-gradient(circle, rgba(20, 184, 166, 0.52) 0%, rgba(20, 184, 166, 0.22) 48%, transparent 75%); filter: blur(16px);"
+				style="background: conic-gradient(from 0deg, rgba(20, 184, 166, 0.65) 0deg, rgba(45, 212, 191, 0.2) 110deg, transparent 210deg, rgba(20, 184, 166, 0.5) 300deg, rgba(20, 184, 166, 0.65) 360deg); filter: blur(16px);"
 			></div>
 
 			<img
@@ -241,7 +242,7 @@
 	</div>
 
 	<!-- Unten links: Programm & Prozent | Unten rechts: Zustands-Icons -->
-	<div class="flex items-center justify-between gap-3 pt-1">
+	<div class="relative z-10 flex items-center justify-between gap-3 pt-1">
 		<div class="min-w-0 truncate text-sm">
 			{#if programm}
 				<span class="font-semibold text-cream-100">{programm}</span>
@@ -287,24 +288,42 @@
 </article>
 
 <style>
-	@keyframes glowPulse {
-		0%,
-		100% {
-			transform: scale(0.92);
-			opacity: 0.6;
+	@keyframes spinGradient {
+		from {
+			transform: rotate(0deg);
 		}
-		50% {
-			transform: scale(1.16);
-			opacity: 1;
+		to {
+			transform: rotate(360deg);
 		}
 	}
 
-	.glow-pulse {
-		animation: glowPulse 3.2s ease-in-out infinite;
+	@keyframes glowSpinPulse {
+		0%,
+		100% {
+			transform: rotate(0deg) scale(0.94);
+			opacity: 0.65;
+		}
+		50% {
+			transform: rotate(180deg) scale(1.12);
+			opacity: 1;
+		}
+		100% {
+			transform: rotate(360deg) scale(0.94);
+			opacity: 0.65;
+		}
+	}
+
+	.gradient-spin {
+		animation: spinGradient 14s linear infinite;
+	}
+
+	.glow-spin {
+		animation: glowSpinPulse 6s ease-in-out infinite;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.glow-pulse {
+		.gradient-spin,
+		.glow-spin {
 			animation: none;
 		}
 	}
