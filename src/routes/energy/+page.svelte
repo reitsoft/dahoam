@@ -18,8 +18,7 @@
 	<AppHeader title="Energie" />
 
 	<main class="grid min-h-0 w-full flex-1 grid-rows-[auto_10rem_11rem_auto] gap-3 px-4 pb-3">
-		<CardZaehler zaehlerstand={data.zaehlerstand}/>
-		<!-- <CardMonat verbrauchProTag={data.verbrauchProTag} verbrauchVormonat={data.verbrauchVormonat} /> -->
+		<CardZaehler zaehlerstand={data.zaehler.importActive} daten={data.zaehler} />
 		<CardMonatSma verbrauchProTag={data.verbrauchProTag} verbrauchVormonat={data.verbrauchVormonat} />
 		<CardJahrHaushalt data={data.verbrauchJahr} />
 		<CardStromfluss />
