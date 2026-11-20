@@ -1,6 +1,6 @@
 // routes/+page.server.ts
 import { env } from '$env/dynamic/private';
-import { getVerbrauchHeute, getVerbrauchMonat } from '$lib/server/stromzaehler.index';
+import { getVerbrauchHeute, getVerbrauchMonat } from '$lib/server/stromzaehler';
 import { getLuefterStatus } from '$lib/server/luefter';
 import { getHausKarte } from '$lib/server/ebus';
 import { isKlingelAktiv, doorbellState } from '$lib/server/mqtt';
