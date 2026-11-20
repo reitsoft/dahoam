@@ -33,6 +33,7 @@
 	let gs = $state<GsState>(untrack(() => initial));
 
 	const PROGRAMME: Record<string, string> = {
+		'001': 'Auto 45-65°',
 		Eco50: 'Eco 50°',
 		Quick45: 'Express 45°',
 		Quick65: 'Express 65°',
@@ -177,28 +178,24 @@
 	{/if}
 
 	<div class="flex items-center gap-3.5">
-		<!-- Bild-Container mit pulsierendem Glow im Lauf-Zustand -->
-		<div
-			class="relative flex h-32 w-32 shrink-0 items-center justify-center rounded-2xl border bg-navy-950/80 transition-colors duration-300 {laeuft
-				? 'border-teal-500/25'
-				: 'border-cream-100/10'}"
-		>
-			<!-- Pulsierender Glow -->
+		<!-- Bild ohne Rahmen, nur pulsierender Glow im Lauf-Zustand -->
+		<div class="relative flex h-32 w-32 shrink-0 items-center justify-center">
+			<!-- Kräftigerer pulsierender Glow -->
 			<div
 				aria-hidden="true"
-				class="pointer-events-none absolute inset-2 rounded-full transition-opacity duration-500 {laeuft
+				class="pointer-events-none absolute -inset-2 rounded-full transition-opacity duration-500 {laeuft
 					? 'glow-pulse opacity-100'
 					: fertig
-						? 'opacity-35'
+						? 'opacity-40'
 						: 'opacity-0'}"
-				style="background: radial-gradient(circle, rgba(20, 184, 166, 0.36) 0%, rgba(20, 184, 166, 0.12) 48%, transparent 74%); filter: blur(12px);"
+				style="background: radial-gradient(circle, rgba(20, 184, 166, 0.52) 0%, rgba(20, 184, 166, 0.22) 48%, transparent 75%); filter: blur(16px);"
 			></div>
 
 			<img
 				src={bild}
 				alt=""
-				class="relative z-10 h-26 w-26 object-contain transition-all duration-300 {laeuft
-					? 'scale-[1.02] opacity-100 drop-shadow-[0_0_12px_rgba(20,184,166,0.28)]'
+				class="relative z-10 h-30 w-30 object-contain transition-all duration-300 {laeuft
+					? 'scale-[1.03] opacity-100 drop-shadow-[0_0_18px_rgba(20,184,166,0.42)]'
 					: fertig
 						? 'opacity-100'
 						: 'opacity-55'}"
@@ -208,27 +205,9 @@
 		<!-- Status & Infos -->
 		<div class="flex min-w-0 flex-1 flex-col justify-between self-stretch py-0.5">
 			<div class="flex items-center justify-between gap-2">
-				<div class="flex min-w-0 items-center gap-2">
-					<span class="truncate text-xs font-bold tracking-wider text-cream-100/55 uppercase">
-						Geschirrspüler
-					</span>
-
-					{#if laeuft}
-						<span
-							class="inline-flex items-center gap-1.5 rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[11px] font-medium text-teal-400"
-						>
-							<span class="h-1.5 w-1.5 rounded-full bg-teal-400 glow-dot"></span>
-							Aktiv
-						</span>
-					{:else if fertig}
-						<span
-							class="inline-flex items-center gap-1 rounded-full border border-cream-100/15 bg-cream-100/5 px-2 py-0.5 text-[11px] font-medium text-cream-100/80"
-						>
-							<CircleCheck class="h-3 w-3 text-teal-400" />
-							Bereit zum Ausräumen
-						</span>
-					{/if}
-				</div>
+				<span class="truncate text-xs font-bold tracking-wider text-cream-100/55 uppercase">
+					Geschirrspüler
+				</span>
 
 				<!-- Platzhalter für den späteren BottomDrawer -->
 				<button
@@ -252,40 +231,29 @@
 					>
 						{statusText}
 					</span>
-				</div>
-				<p class="mt-0.5 truncate text-xs text-cream-100/55">{detail}</p>
-			</div>
-
-			<!-- Programm & Prozent -->
-			<div class="flex min-h-5 items-baseline justify-between gap-2 text-sm">
-				<div class="min-w-0 truncate">
-					{#if programm}
-						<span class="font-semibold text-cream-100">{programm}</span>
-					{:else}
-						<span class="text-xs text-cream-100/35">Kein Programm gewählt</span>
+					{#if fertig}
+						<CircleCheck class="h-5 w-5 stroke-2 text-teal-400" aria-label="Fertig" />
 					{/if}
 				</div>
-
-				{#if laeuft || fertig}
-					<span class="shrink-0 font-mono text-xs font-semibold text-cream-100/75">
-						{prozent}%
-					</span>
-				{/if}
+				<p class="mt-0.5 truncate text-xs text-cream-100/55">{detail}</p>
 			</div>
 		</div>
 	</div>
 
-	<!-- Programm-Info & Zustands-Icons -->
-	<div class="flex items-center justify-between gap-2 border-t border-cream-100/10 pt-2.5">
-		<span class="truncate text-xs text-cream-100/50">
-			{#if programm && (laeuft || fertig)}
-				{programm} · {prozent}%
-			{:else if programm}
-				{programm}
+	<!-- Unten links: Programm & Prozent | Unten rechts: Zustands-Icons -->
+	<div class="flex items-center justify-between gap-3 pt-1">
+		<div class="min-w-0 truncate text-sm">
+			{#if programm}
+				<span class="font-semibold text-cream-100">{programm}</span>
+				{#if laeuft || fertig}
+					<span class="text-cream-100/55"> · {prozent}%</span>
+				{/if}
+			{:else if laeuft || fertig}
+				<span class="font-semibold text-cream-100/75">{prozent}%</span>
 			{:else}
-				Kein aktives Programm
+				<span class="text-xs text-cream-100/35">Kein Programm gewählt</span>
 			{/if}
-		</span>
+		</div>
 
 		<div class="relative flex shrink-0 gap-2" bind:this={iconBereich}>
 			{#each infos as info (info.key)}
@@ -323,23 +291,11 @@
 		0%,
 		100% {
 			transform: scale(0.92);
-			opacity: 0.55;
+			opacity: 0.6;
 		}
 		50% {
-			transform: scale(1.12);
+			transform: scale(1.16);
 			opacity: 1;
-		}
-	}
-
-	@keyframes dotPulse {
-		0%,
-		100% {
-			opacity: 0.55;
-			transform: scale(0.9);
-		}
-		50% {
-			opacity: 1;
-			transform: scale(1.15);
 		}
 	}
 
@@ -347,13 +303,8 @@
 		animation: glowPulse 3.2s ease-in-out infinite;
 	}
 
-	.glow-dot {
-		animation: dotPulse 2.4s ease-in-out infinite;
-	}
-
 	@media (prefers-reduced-motion: reduce) {
-		.glow-pulse,
-		.glow-dot {
+		.glow-pulse {
 			animation: none;
 		}
 	}
