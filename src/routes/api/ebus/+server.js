@@ -1,6 +1,7 @@
+// src/routes/api/ebus/+server.js
 import { json } from '@sveltejs/kit';
-import { getEbusData, getEbusRaw } from '$lib/server/ebus';
+import { getEbusData } from '$lib/server/ebus';
 
-export function GET({ url }) {
-  return json(url.searchParams.has('raw') ? getEbusRaw() : getEbusData());
+export function GET() {
+	return json(getEbusData());
 }
