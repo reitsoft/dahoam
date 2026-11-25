@@ -5,9 +5,7 @@
 	import Viewport from '$lib/components/Viewport.svelte';
 	import AppHeader from '$lib/components/AppHeader.svelte';
 	import CardZaehler from '$lib/components/energy/CardZaehler.svelte';
-	//import CardMonat from '$lib/components/energy/CardMonat.svelte';
 	import CardMonatSma from '$lib/components/energy/CardMonatSma.svelte';
-	//import CardJahr from '$lib/components/energy/CardJahr.svelte';
 	import CardJahrHaushalt from '$lib/components/energy/CardJahrHaushalt.svelte';
 	import CardStromfluss from '$lib/components/energy/CardStromfluss.svelte';
 
