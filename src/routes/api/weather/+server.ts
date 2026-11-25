@@ -1,10 +1,23 @@
 import { json } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
 
-const LATITUDE = 47.85639756600935;
-const LONGITUDE = 8.781613169200257;
+const DEFAULT_LATITUDE = 47.8;
+const DEFAULT_LONGITUDE = 8.7;
 const FETCH_TIMEOUT_MS = 5000;
 const HOURLY_STUNDEN = 12;
+
+function parseCoordinate(rawValue: string | undefined, fallback: number, min: number, max: number): number {
+	if (!rawValue) return fallback;
+	const parsed = Number(rawValue.trim());
+	if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+		return fallback;
+	}
+	return parsed;
+}
+
+const LATITUDE = parseCoordinate(env.WEATHER_LATITUDE, DEFAULT_LATITUDE, -90, 90);
+const LONGITUDE = parseCoordinate(env.WEATHER_LONGITUDE, DEFAULT_LONGITUDE, -180, 180);
 
 // --- WMO Weather Code → Bedingung (Text) & Icon ---
 const WMO_MAP: Record<number, { text: string; iconDay: string; iconNight: string }> = {
@@ -43,10 +56,7 @@ function degToCompass(deg: number): string {
 }
 
 export const GET: RequestHandler = async ({ fetch }) => {
-	// is_day + hourly-Parameter ergänzt, forecast_days auf 2 erhöht
-	// (damit die Hourly-Leiste über Mitternacht hinaus nicht leer läuft)
-	// forecast_days von 2 auf 6 erhöhen (heute + 5 Folgetage)
-	const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LATITUDE}&longitude=${LONGITUDE}&current=temperature_2m,relative_humidity_2m,rain,precipitation,wind_speed_10m,wind_direction_10m,weather_code,is_day&hourly=temperature_2m,weather_code,precipitation_probability,is_day&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code&forecast_days=6&timezone=Europe/Berlin`;
+	const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LATITUDE}&longitude=${LONGITUDE}¤t=temperature_2m,relative_humidity_2m,rain,precipitation,wind_speed_10m,wind_direction_10m,weather_code,is_day&hourly=temperature_2m,weather_code,precipitation_probability,is_day&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code&forecast_days=6&timezone=Europe/Berlin`;
 	const controller = new AbortController();
 	const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
@@ -78,6 +88,7 @@ export const GET: RequestHandler = async ({ fetch }) => {
 				rainProbability: data.hourly.precipitation_probability[idx] ?? 0
 			};
 		});
+
 		// --- 5-Tage-Vorhersage (Index 0 = heute, wird übersprungen) ---
 		const daily = (data.daily.time as string[]).slice(1, 6).map((dateStr: string, i: number) => {
 			const idx = i + 1;
@@ -93,7 +104,6 @@ export const GET: RequestHandler = async ({ fetch }) => {
 		});
 
 		return json({
-			// Aktuelle Werte
 			temperature: data.current.temperature_2m,
 			temperatureUnit: data.current_units.temperature_2m,
 			humidity: data.current.relative_humidity_2m,
@@ -113,7 +123,6 @@ export const GET: RequestHandler = async ({ fetch }) => {
 
 			time: data.current.time,
 
-			// Vorhersage für HEUTE (Index 0 entspricht dem aktuellen Tag)
 			today: {
 				tempMax: data.daily.temperature_2m_max[0],
 				tempMin: data.daily.temperature_2m_min[0],
