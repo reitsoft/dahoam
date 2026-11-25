@@ -16,8 +16,12 @@ function parseCoordinate(rawValue: string | undefined, fallback: number, min: nu
 	return parsed;
 }
 
-const LATITUDE = parseCoordinate(env.WEATHER_LATITUDE, DEFAULT_LATITUDE, -90, 90);
-const LONGITUDE = parseCoordinate(env.WEATHER_LONGITUDE, DEFAULT_LONGITUDE, -180, 180);
+// Erstmal die Fallback Koordinaten verwenden
+// const LATITUDE = parseCoordinate(env.WEATHER_LATITUDE, DEFAULT_LATITUDE, -90, 90);
+// const LONGITUDE = parseCoordinate(env.WEATHER_LONGITUDE, DEFAULT_LONGITUDE, -180, 180);
+
+const LATITUDE = DEFAULT_LATITUDE;
+const LONGITUDE = DEFAULT_LONGITUDE;
 
 // --- WMO Weather Code → Bedingung (Text) & Icon ---
 const WMO_MAP: Record<number, { text: string; iconDay: string; iconNight: string }> = {
