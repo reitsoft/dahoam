@@ -8,6 +8,7 @@
 		status: 'BEREIT' | 'LAEUFT' | 'FERTIG';
 		startedAt: number | null;
 		fertigAm: number | null;
+		leistung: number | null; // Watt, aktuelle Leistung des Shelly
 	};
 
 	let {
@@ -38,6 +39,14 @@
 		new Date(ms).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
 	const kwh = (v: number | null) => (v == null ? '–' : v.toFixed(1).replace('.', ','));
+
+	// Unter 10 W eine Nachkommastelle (Standby-Werte), darüber ganze Watt
+	const watt = (v: number | null | undefined) =>
+		v == null
+			? '–'
+			: v.toLocaleString('de-DE', { maximumFractionDigits: v < 10 ? 1 : 0 });
+
+	let leistungText = $derived(`${watt(s.leistung)} W`);
 
 	let laufzeit = $derived.by(() => {
 		if (!laeuft || !s.startedAt) return '';
@@ -123,6 +132,7 @@
 					{#if fertig}
 						<CircleCheck class="h-5 w-5 stroke-2 text-teal-500" aria-label="Fertig" />
 					{/if}
+					<span class="ml-auto text-xs tabular-nums text-cream-100/50">{leistungText}</span>
 				</div>
 				<div class="h-4 text-xs text-cream-100/50">{detail}</div>
 			</div>

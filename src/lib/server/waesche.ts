@@ -7,7 +7,6 @@ import { mqttClient, mqttEvents, CLIENT_ID } from './mqtt';
 import { WAESCHE_LIST } from '$lib/config/waesche';
 
 declare global {
-	// eslint-disable-next-line no-var
 	var __waescheStarted: boolean | undefined;
 }
 
@@ -58,7 +57,7 @@ function load() {
 }
 
 function publishState(id: string, s: WaescheStatus) {
-	mqttClient.publish(`haushalt/${id}/status`, s.status, { retain: true });
+	mqttClient.publish(`haushalt/${id}/state`, s.status, { retain: true });
 }
 
 function auswerten(id: string, watt: number | null) {
@@ -113,14 +112,19 @@ function auswerten(id: string, watt: number | null) {
 function start() {
 	load();
 
-	const topicsOf = (mqttId: string) => `${mqttId}/status/switch:0`;
+	const topicsOf = (mqttId: string) => `${mqttId}/status/pm1:0`;
+	const rpcTopic = (id: string) => `${CLIENT_ID}-${id}/rpc`;
 	const subscribeAll = () => {
 		for (const g of WAESCHE_LIST) {
-			mqttClient.subscribe(topicsOf(g.mqttId));
-			// Aktuellen Wert einmal aktiv abfragen, Antwort kommt auf <CLIENT_ID>/rpc
+			mqttClient.subscribe([topicsOf(g.mqttId), rpcTopic(g.id)]);
 			mqttClient.publish(
 				`${g.mqttId}/rpc`,
-				JSON.stringify({ id: 3, src: CLIENT_ID, method: 'Switch.GetStatus', params: { id: 0 } })
+				JSON.stringify({
+					id: 3,
+					src: `${CLIENT_ID}-${g.id}`,
+					method: 'PM1.GetStatus',
+					params: { id: 0 }
+				})
 			);
 		}
 	};
@@ -128,21 +132,18 @@ function start() {
 	mqttClient.on('connect', subscribeAll);
 
 	mqttClient.on('message', (topic, message) => {
-		const g = WAESCHE_LIST.find((x) => topic === topicsOf(x.mqttId));
-		const antwort = topic === `${CLIENT_ID}/rpc`;
-		if (!g && !antwort) return;
+		const g = WAESCHE_LIST.find((x) => topic === topicsOf(x.mqttId) || topic === rpcTopic(x.id));
+		if (!g) return;
 		try {
 			const data = JSON.parse(message.toString());
-			if (g) {
-				if (typeof data.apower === 'number') auswerten(g.id, data.apower);
-			} else {
-				const gg = WAESCHE_LIST.find((x) => x.mqttId === data.src);
-				if (gg && typeof data.result?.apower === 'number') auswerten(gg.id, data.result.apower);
-			}
+			const watt = topic === rpcTopic(g.id) ? data.result?.apower : data.apower;
+			if (typeof watt === 'number') auswerten(g.id, watt);
 		} catch {
 			// ungültiges JSON ignorieren
 		}
 	});
+
+	for (const g of WAESCHE_LIST) publishState(g.id, waescheStates.get(g.id)!);
 
 	// Ende und Zeitablauf auch ohne neue Nachricht erkennen (Shelly sendet nur bei Änderung)
 	setInterval(() => {

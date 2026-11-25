@@ -9,6 +9,6 @@ export type WaescheGeraet = {
 };
 
 export const WAESCHE_LIST: WaescheGeraet[] = [
-	{ id: 'waschmaschine', name: 'Waschmaschine', mqttId: 'shelly-waschmaschine', startW: 8, startSek: 30, endeSek: 300 },
-	{ id: 'trockner', name: 'Trockner', mqttId: 'shelly-trockner', startW: 8, startSek: 30, endeSek: 300 }
+	{ id: 'waschmaschine', name: 'Waschmaschine', mqttId: 'haushalt/waschmaschine', startW: 8, startSek: 30, endeSek: 300 },
+	{ id: 'trockner', name: 'Trockner', mqttId: 'haushalt/trockner', startW: 8, startSek: 30, endeSek: 300 }
 ];

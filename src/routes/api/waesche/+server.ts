@@ -1,3 +1,4 @@
+// routes/api/waesche/+server.ts
 import { json } from '@sveltejs/kit';
 import { waescheStates } from '$lib/server/waesche';
 
